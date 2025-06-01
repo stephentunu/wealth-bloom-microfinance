@@ -36,7 +36,7 @@ const LoanManagement = ({ userId, userProfile }: LoanManagementProps) => {
 
       if (error) {
         console.error('Error fetching loan eligibility:', error);
-      } else if (data && data.length > 0) {
+      } else if (data && Array.isArray(data) && data.length > 0) {
         setEligibility(data[0]);
       }
     } catch (error) {
