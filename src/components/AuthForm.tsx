@@ -5,15 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 
-interface AuthFormProps {
-  onAuth: (user: any) => void;
-}
-
-const AuthForm = ({ onAuth }: AuthFormProps) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
+const AuthForm = () => {
+  const { signUp, signIn, loading } = useAuth();
 
   const [signUpData, setSignUpData] = useState({
     name: '',
@@ -30,63 +25,16 @@ const AuthForm = ({ onAuth }: AuthFormProps) => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-
-    // Simulate API call
-    setTimeout(() => {
-      const user = {
-        id: Date.now(),
-        name: signUpData.name,
-        email: signUpData.email,
-        phone: signUpData.phone,
-        address: signUpData.address,
-        savingsBalance: 0,
-        creditScore: 650,
-        accountCreated: new Date(),
-        isVerified: true,
-      };
-
-      localStorage.setItem('microfinance_user', JSON.stringify(user));
-      toast({
-        title: "Account created successfully!",
-        description: "Welcome to WealthBloom Microfinance",
-      });
-      onAuth(user);
-      setIsLoading(false);
-    }, 1500);
+    await signUp(signUpData.email, signUpData.password, {
+      name: signUpData.name,
+      phone: signUpData.phone,
+      address: signUpData.address,
+    });
   };
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-
-    // Simulate API call
-    setTimeout(() => {
-      const savedUser = localStorage.getItem('microfinance_user');
-      if (savedUser) {
-        const user = JSON.parse(savedUser);
-        if (user.email === signInData.email) {
-          toast({
-            title: "Welcome back!",
-            description: "Successfully signed in to your account",
-          });
-          onAuth(user);
-        } else {
-          toast({
-            title: "Invalid credentials",
-            description: "Please check your email and password",
-            variant: "destructive",
-          });
-        }
-      } else {
-        toast({
-          title: "Account not found",
-          description: "Please sign up first",
-          variant: "destructive",
-        });
-      }
-      setIsLoading(false);
-    }, 1000);
+    await signIn(signInData.email, signInData.password);
   };
 
   return (
@@ -125,8 +73,8 @@ const AuthForm = ({ onAuth }: AuthFormProps) => {
                     required
                   />
                 </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? 'Signing In...' : 'Sign In'}
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? 'Signing In...' : 'Sign In'}
                 </Button>
               </form>
             </TabsContent>
@@ -180,8 +128,8 @@ const AuthForm = ({ onAuth }: AuthFormProps) => {
                     required
                   />
                 </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? 'Creating Account...' : 'Create Account'}
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? 'Creating Account...' : 'Create Account'}
                 </Button>
               </form>
             </TabsContent>

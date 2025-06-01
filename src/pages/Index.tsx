@@ -1,107 +1,51 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import AuthForm from '@/components/AuthForm';
 import Navbar from '@/components/Navbar';
 import Dashboard from '@/components/Dashboard';
 import SavingsAccount from '@/components/SavingsAccount';
 import LoanManagement from '@/components/LoanManagement';
+import { useAuth } from '@/hooks/useAuth';
 
 const Index = () => {
-  const [user, setUser] = useState(null);
+  const { user, userProfile, loading, signOut } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [savingsData, setSavingsData] = useState({
-    balance: 0,
-    interestEarned: 0,
-    transactions: [],
-  });
-  const [loansData, setLoansData] = useState([]);
 
-  useEffect(() => {
-    const savedUser = localStorage.getItem('microfinance_user');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
-    const savedSavings = localStorage.getItem('microfinance_savings');
-    if (savedSavings) {
-      setSavingsData(JSON.parse(savedSavings));
-    }
-
-    const savedLoans = localStorage.getItem('microfinance_loans');
-    if (savedLoans) {
-      setLoansData(JSON.parse(savedLoans));
-    }
-  }, []);
-
-  useEffect(() => {
-    if (user) {
-      localStorage.setItem('microfinance_user', JSON.stringify(user));
-    }
-  }, [user]);
-
-  useEffect(() => {
-    localStorage.setItem('microfinance_savings', JSON.stringify(savingsData));
-  }, [savingsData]);
-
-  useEffect(() => {
-    localStorage.setItem('microfinance_loans', JSON.stringify(loansData));
-  }, [loansData]);
-
-  const handleAuth = (userData: any) => {
-    setUser(userData);
-  };
+  if (!user || !userProfile) {
+    return <AuthForm />;
+  }
 
   const handleLogout = () => {
-    setUser(null);
+    signOut();
     setActiveTab('dashboard');
-    localStorage.removeItem('microfinance_user');
   };
-
-  const handleUpdateSavings = (newSavingsData: any) => {
-    setSavingsData(newSavingsData);
-  };
-
-  const handleUpdateLoans = (newLoansData: any) => {
-    setLoansData(newLoansData);
-  };
-
-  if (!user) {
-    return <AuthForm onAuth={handleAuth} />;
-  }
 
   const renderContent = () => {
     switch (activeTab) {
       case 'savings':
-        return (
-          <SavingsAccount
-            savingsData={savingsData}
-            onUpdateSavings={handleUpdateSavings}
-          />
-        );
+        return <SavingsAccount userId={user.id} />;
       case 'loans':
-        return (
-          <LoanManagement
-            user={user}
-            savingsData={savingsData}
-            loansData={loansData}
-            onUpdateLoans={handleUpdateLoans}
-          />
-        );
+        return <LoanManagement userId={user.id} userProfile={userProfile} />;
       default:
-        return (
-          <Dashboard
-            user={user}
-            savingsData={savingsData}
-            loansData={loansData}
-          />
-        );
+        return <Dashboard userId={user.id} userProfile={userProfile} />;
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar
-        user={user}
+        user={userProfile}
         onLogout={handleLogout}
         activeTab={activeTab}
         onTabChange={setActiveTab}

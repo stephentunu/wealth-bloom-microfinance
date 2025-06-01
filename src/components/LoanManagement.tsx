@@ -1,33 +1,54 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { useToast } from '@/hooks/use-toast';
-import { Calculator, Calendar, AlertCircle, CheckCircle } from 'lucide-react';
+import { Calculator, CheckCircle, AlertCircle } from 'lucide-react';
+import { useLoans } from '@/hooks/useLoans';
+import { useSavings } from '@/hooks/useSavings';
+import { supabase } from '@/integrations/supabase/client';
 
 interface LoanManagementProps {
-  user: any;
-  savingsData: any;
-  loansData: any[];
-  onUpdateLoans: (newLoans: any[]) => void;
+  userId: string;
+  userProfile: any;
 }
 
-const LoanManagement = ({ user, savingsData, loansData, onUpdateLoans }: LoanManagementProps) => {
+const LoanManagement = ({ userId, userProfile }: LoanManagementProps) => {
+  const { loans, loading, applyForLoan, makePayment } = useLoans(userId);
+  const { savingsAccount } = useSavings(userId);
   const [loanAmount, setLoanAmount] = useState('');
   const [loanPurpose, setLoanPurpose] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
+  const [eligibility, setEligibility] = useState<any>(null);
 
-  const maxLoanAmount = Math.max(0, savingsData.balance * 0.8 - loansData.reduce((sum, loan) => sum + loan.remainingAmount, 0));
-  const interestRate = user.creditScore >= 700 ? 8.5 : user.creditScore >= 650 ? 12.0 : 15.5;
+  useEffect(() => {
+    if (userId) {
+      fetchLoanEligibility();
+    }
+  }, [userId, savingsAccount]);
+
+  const fetchLoanEligibility = async () => {
+    try {
+      const { data, error } = await supabase
+        .rpc('calculate_loan_eligibility', { user_uuid: userId });
+
+      if (error) {
+        console.error('Error fetching loan eligibility:', error);
+      } else if (data && data.length > 0) {
+        setEligibility(data[0]);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
 
   const calculateLoanDetails = (amount: number) => {
-    const monthlyRate = interestRate / 100 / 12;
-    const months = 12; // 1 year term
+    if (!eligibility) return null;
+    
+    const monthlyRate = eligibility.recommended_rate / 12;
+    const months = 12;
     const monthlyPayment = (amount * monthlyRate * Math.pow(1 + monthlyRate, months)) / (Math.pow(1 + monthlyRate, months) - 1);
     const totalAmount = monthlyPayment * months;
     
@@ -40,98 +61,32 @@ const LoanManagement = ({ user, savingsData, loansData, onUpdateLoans }: LoanMan
 
   const handleApplyLoan = async () => {
     const amount = parseFloat(loanAmount);
-    
-    if (amount <= 0) {
-      toast({
-        title: "Invalid amount",
-        description: "Please enter a valid loan amount",
-        variant: "destructive",
-      });
+    if (!eligibility || amount <= 0 || amount > eligibility.max_loan_amount || !loanPurpose.trim()) {
       return;
     }
 
-    if (amount > maxLoanAmount) {
-      toast({
-        title: "Loan amount too high",
-        description: `Maximum loan amount is $${maxLoanAmount.toLocaleString()} based on your savings`,
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!loanPurpose.trim()) {
-      toast({
-        title: "Purpose required",
-        description: "Please specify the purpose of your loan",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsLoading(true);
-
-    setTimeout(() => {
-      const loanDetails = calculateLoanDetails(amount);
-      const newLoan = {
-        id: Date.now(),
-        amount,
-        remainingAmount: amount,
-        purpose: loanPurpose,
-        interestRate,
-        monthlyPayment: parseFloat(loanDetails.monthlyPayment),
-        totalAmount: parseFloat(loanDetails.totalAmount),
-        appliedDate: new Date().toLocaleDateString(),
-        dueDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toLocaleDateString(),
-        status: 'active',
-        paymentsRemaining: 12,
-        paymentHistory: [],
-      };
-
-      const updatedLoans = [...loansData, newLoan];
-      onUpdateLoans(updatedLoans);
-
-      setLoanAmount('');
-      setLoanPurpose('');
-      setIsLoading(false);
-
-      toast({
-        title: "Loan approved!",
-        description: `Your loan of $${amount.toLocaleString()} has been approved`,
-      });
-    }, 2000);
+    const interestRate = eligibility.recommended_rate * 100;
+    await applyForLoan(amount, loanPurpose, interestRate);
+    setLoanAmount('');
+    setLoanPurpose('');
   };
 
-  const handleLoanPayment = (loanId: number, paymentAmount: number) => {
-    const updatedLoans = loansData.map(loan => {
-      if (loan.id === loanId) {
-        const newRemainingAmount = Math.max(0, loan.remainingAmount - paymentAmount);
-        const newPaymentsRemaining = Math.max(0, loan.paymentsRemaining - 1);
-        
-        return {
-          ...loan,
-          remainingAmount: newRemainingAmount,
-          paymentsRemaining: newPaymentsRemaining,
-          status: newRemainingAmount === 0 ? 'paid' : 'active',
-          paymentHistory: [
-            ...loan.paymentHistory,
-            {
-              date: new Date().toLocaleDateString(),
-              amount: paymentAmount,
-              remainingBalance: newRemainingAmount,
-            }
-          ],
-        };
-      }
-      return loan;
-    });
-
-    onUpdateLoans(updatedLoans);
-    
-    toast({
-      title: "Payment successful!",
-      description: `Payment of $${paymentAmount.toLocaleString()} has been processed`,
-    });
+  const handleLoanPayment = async (loanId: string, paymentAmount: number) => {
+    await makePayment(loanId, paymentAmount);
   };
+
+  if (!eligibility) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center py-12">
+          <h2 className="text-2xl font-bold text-gray-900">Loading loan information...</h2>
+          <p className="text-gray-600 mt-2">Please wait while we calculate your eligibility.</p>
+        </div>
+      </div>
+    );
+  }
+
+  const interestRatePercent = (eligibility.recommended_rate * 100).toFixed(1);
 
   return (
     <div className="space-y-6">
@@ -141,66 +96,69 @@ const LoanManagement = ({ user, savingsData, loansData, onUpdateLoans }: LoanMan
           <p className="text-gray-600">Apply for loans and manage your repayments</p>
         </div>
         <Badge variant="outline" className="text-blue-600 border-blue-600">
-          {interestRate}% APR
+          {interestRatePercent}% APR
         </Badge>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          {loansData.length > 0 && (
+          {loans.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle>Your Active Loans</CardTitle>
+                <CardTitle>Your Loans</CardTitle>
                 <CardDescription>Track your loan repayments and balances</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {loansData.map((loan) => (
+                  {loans.map((loan) => (
                     <div key={loan.id} className="border rounded-lg p-4 space-y-3">
                       <div className="flex items-center justify-between">
                         <div>
-                          <h3 className="font-semibold">{loan.purpose}</h3>
-                          <p className="text-sm text-muted-foreground">Applied: {loan.appliedDate}</p>
+                          <h3 className="font-semibold">Loan #{loan.loan_number}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            Applied: {new Date(loan.created_at).toLocaleDateString()}
+                          </p>
                         </div>
-                        <Badge variant={loan.status === 'paid' ? 'secondary' : 'default'}>
-                          {loan.status === 'paid' ? 'Paid Off' : 'Active'}
+                        <Badge variant={loan.status === 'paid_off' ? 'secondary' : 'default'}>
+                          {loan.status === 'paid_off' ? 'Paid Off' : 'Active'}
                         </Badge>
                       </div>
                       
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div>
-                          <p className="text-muted-foreground">Original Amount</p>
-                          <p className="font-medium">${loan.amount.toLocaleString()}</p>
+                          <p className="text-muted-foreground">Principal Amount</p>
+                          <p className="font-medium">${loan.principal_amount.toLocaleString()}</p>
                         </div>
                         <div>
                           <p className="text-muted-foreground">Remaining</p>
-                          <p className="font-medium text-orange-600">${loan.remainingAmount.toLocaleString()}</p>
+                          <p className="font-medium text-orange-600">${loan.remaining_balance.toLocaleString()}</p>
                         </div>
                         <div>
                           <p className="text-muted-foreground">Monthly Payment</p>
-                          <p className="font-medium">${loan.monthlyPayment.toLocaleString()}</p>
+                          <p className="font-medium">${loan.monthly_payment.toLocaleString()}</p>
                         </div>
                         <div>
-                          <p className="text-muted-foreground">Payments Left</p>
-                          <p className="font-medium">{loan.paymentsRemaining}</p>
+                          <p className="text-muted-foreground">Interest Rate</p>
+                          <p className="font-medium">{(loan.interest_rate * 100).toFixed(1)}%</p>
                         </div>
                       </div>
 
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm">
                           <span>Progress</span>
-                          <span>{((loan.amount - loan.remainingAmount) / loan.amount * 100).toFixed(1)}%</span>
+                          <span>{((loan.principal_amount - loan.remaining_balance) / loan.principal_amount * 100).toFixed(1)}%</span>
                         </div>
-                        <Progress value={(loan.amount - loan.remainingAmount) / loan.amount * 100} />
+                        <Progress value={(loan.principal_amount - loan.remaining_balance) / loan.principal_amount * 100} />
                       </div>
 
                       {loan.status === 'active' && (
                         <Button
-                          onClick={() => handleLoanPayment(loan.id, loan.monthlyPayment)}
+                          onClick={() => handleLoanPayment(loan.id, loan.monthly_payment)}
                           size="sm"
                           className="w-full"
+                          disabled={loading}
                         >
-                          Make Payment (${loan.monthlyPayment.toLocaleString()})
+                          Make Payment (${loan.monthly_payment.toLocaleString()})
                         </Button>
                       )}
                     </div>
@@ -218,31 +176,35 @@ const LoanManagement = ({ user, savingsData, loansData, onUpdateLoans }: LoanMan
             <CardContent>
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div className="text-center p-4 bg-green-50 rounded-lg">
-                  <div className="text-2xl font-bold text-green-600">${maxLoanAmount.toLocaleString()}</div>
+                  <div className="text-2xl font-bold text-green-600">
+                    ${eligibility.max_loan_amount?.toLocaleString() || '0'}
+                  </div>
                   <p className="text-sm text-muted-foreground">Maximum Loan Amount</p>
                 </div>
                 <div className="text-center p-4 bg-blue-50 rounded-lg">
-                  <div className="text-2xl font-bold text-blue-600">{interestRate}%</div>
+                  <div className="text-2xl font-bold text-blue-600">{interestRatePercent}%</div>
                   <p className="text-sm text-muted-foreground">Your Interest Rate</p>
                 </div>
               </div>
               
               <div className="space-y-2">
                 <div className="flex items-center space-x-2">
-                  {user.creditScore >= 650 ? (
+                  {userProfile.credit_score >= 650 ? (
                     <CheckCircle className="w-4 h-4 text-green-600" />
                   ) : (
                     <AlertCircle className="w-4 h-4 text-red-600" />
                   )}
-                  <span className="text-sm">Credit Score: {user.creditScore}</span>
+                  <span className="text-sm">Credit Score: {userProfile.credit_score}</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  {savingsData.balance >= 100 ? (
+                  {savingsAccount && savingsAccount.balance >= 100 ? (
                     <CheckCircle className="w-4 h-4 text-green-600" />
                   ) : (
                     <AlertCircle className="w-4 h-4 text-red-600" />
                   )}
-                  <span className="text-sm">Savings Balance: ${savingsData.balance.toLocaleString()}</span>
+                  <span className="text-sm">
+                    Savings Balance: ${savingsAccount?.balance?.toLocaleString() || '0'}
+                  </span>
                 </div>
               </div>
             </CardContent>
@@ -267,10 +229,10 @@ const LoanManagement = ({ user, savingsData, loansData, onUpdateLoans }: LoanMan
                   placeholder="Enter amount"
                   value={loanAmount}
                   onChange={(e) => setLoanAmount(e.target.value)}
-                  max={maxLoanAmount}
+                  max={eligibility.max_loan_amount}
                 />
                 <p className="text-xs text-muted-foreground mt-1">
-                  Maximum: ${maxLoanAmount.toLocaleString()}
+                  Maximum: ${eligibility.max_loan_amount?.toLocaleString() || '0'}
                 </p>
               </div>
 
@@ -289,6 +251,7 @@ const LoanManagement = ({ user, savingsData, loansData, onUpdateLoans }: LoanMan
                   <h4 className="font-medium text-sm">Loan Preview</h4>
                   {(() => {
                     const details = calculateLoanDetails(parseFloat(loanAmount));
+                    if (!details) return null;
                     return (
                       <div className="text-xs space-y-1">
                         <div className="flex justify-between">
@@ -316,9 +279,15 @@ const LoanManagement = ({ user, savingsData, loansData, onUpdateLoans }: LoanMan
               <Button
                 onClick={handleApplyLoan}
                 className="w-full"
-                disabled={isLoading || !loanAmount || !loanPurpose || parseFloat(loanAmount) > maxLoanAmount}
+                disabled={
+                  loading || 
+                  !loanAmount || 
+                  !loanPurpose || 
+                  parseFloat(loanAmount) > (eligibility.max_loan_amount || 0) ||
+                  parseFloat(loanAmount) <= 0
+                }
               >
-                {isLoading ? 'Processing...' : 'Apply for Loan'}
+                {loading ? 'Processing...' : 'Apply for Loan'}
               </Button>
 
               <div className="text-xs text-muted-foreground space-y-1">

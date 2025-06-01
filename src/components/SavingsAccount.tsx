@@ -5,107 +5,43 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
 import { Plus, Minus, TrendingUp } from 'lucide-react';
+import { useSavings } from '@/hooks/useSavings';
 
 interface SavingsAccountProps {
-  savingsData: any;
-  onUpdateSavings: (newData: any) => void;
+  userId: string;
 }
 
-const SavingsAccount = ({ savingsData, onUpdateSavings }: SavingsAccountProps) => {
+const SavingsAccount = ({ userId }: SavingsAccountProps) => {
+  const { savingsAccount, transactions, loading, deposit, withdraw } = useSavings(userId);
   const [amount, setAmount] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
 
   const handleDeposit = async () => {
     const depositAmount = parseFloat(amount);
-    if (depositAmount <= 0) {
-      toast({
-        title: "Invalid amount",
-        description: "Please enter a valid deposit amount",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsLoading(true);
-    
-    setTimeout(() => {
-      const newTransaction = {
-        id: Date.now(),
-        type: 'deposit',
-        amount: depositAmount,
-        description: 'Savings deposit',
-        date: new Date().toLocaleDateString(),
-        balance: savingsData.balance + depositAmount,
-      };
-
-      const updatedSavings = {
-        ...savingsData,
-        balance: savingsData.balance + depositAmount,
-        transactions: [newTransaction, ...savingsData.transactions],
-      };
-
-      onUpdateSavings(updatedSavings);
+    if (depositAmount > 0) {
+      await deposit(depositAmount);
       setAmount('');
-      setIsLoading(false);
-      
-      toast({
-        title: "Deposit successful!",
-        description: `$${depositAmount.toLocaleString()} has been added to your savings`,
-      });
-    }, 1000);
+    }
   };
 
   const handleWithdraw = async () => {
     const withdrawAmount = parseFloat(amount);
-    if (withdrawAmount <= 0) {
-      toast({
-        title: "Invalid amount",
-        description: "Please enter a valid withdrawal amount",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (withdrawAmount > savingsData.balance) {
-      toast({
-        title: "Insufficient funds",
-        description: "You cannot withdraw more than your current balance",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsLoading(true);
-    
-    setTimeout(() => {
-      const newTransaction = {
-        id: Date.now(),
-        type: 'withdrawal',
-        amount: withdrawAmount,
-        description: 'Savings withdrawal',
-        date: new Date().toLocaleDateString(),
-        balance: savingsData.balance - withdrawAmount,
-      };
-
-      const updatedSavings = {
-        ...savingsData,
-        balance: savingsData.balance - withdrawAmount,
-        transactions: [newTransaction, ...savingsData.transactions],
-      };
-
-      onUpdateSavings(updatedSavings);
+    if (withdrawAmount > 0) {
+      await withdraw(withdrawAmount);
       setAmount('');
-      setIsLoading(false);
-      
-      toast({
-        title: "Withdrawal successful!",
-        description: `$${withdrawAmount.toLocaleString()} has been withdrawn from your savings`,
-      });
-    }, 1000);
+    }
   };
+
+  if (!savingsAccount) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center py-12">
+          <h2 className="text-2xl font-bold text-gray-900">Setting up your savings account...</h2>
+          <p className="text-gray-600 mt-2">Please wait while we initialize your account.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -115,7 +51,7 @@ const SavingsAccount = ({ savingsData, onUpdateSavings }: SavingsAccountProps) =
           <p className="text-gray-600">Manage your savings and earn interest</p>
         </div>
         <Badge variant="outline" className="text-green-600 border-green-600">
-          3.5% APY
+          {(savingsAccount.interest_rate * 100).toFixed(1)}% APY
         </Badge>
       </div>
 
@@ -127,14 +63,16 @@ const SavingsAccount = ({ savingsData, onUpdateSavings }: SavingsAccountProps) =
                 <TrendingUp className="w-5 h-5 text-green-600" />
                 <span>Account Balance</span>
               </CardTitle>
-              <CardDescription>Your current savings balance and interest earned</CardDescription>
+              <CardDescription>
+                Account Number: {savingsAccount.account_number}
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="text-4xl font-bold text-green-600 mb-2">
-                ${savingsData.balance.toLocaleString()}
+                ${savingsAccount.balance.toLocaleString()}
               </div>
               <p className="text-sm text-muted-foreground">
-                Interest earned this month: ${savingsData.interestEarned.toFixed(2)}
+                Interest earned: ${savingsAccount.interest_earned.toFixed(2)}
               </p>
             </CardContent>
           </Card>
@@ -146,25 +84,27 @@ const SavingsAccount = ({ savingsData, onUpdateSavings }: SavingsAccountProps) =
             </CardHeader>
             <CardContent>
               <div className="space-y-3 max-h-96 overflow-y-auto">
-                {savingsData.transactions.map((transaction: any) => (
+                {transactions.map((transaction) => (
                   <div key={transaction.id} className="flex items-center justify-between border-b pb-2">
                     <div>
                       <p className="text-sm font-medium">{transaction.description}</p>
-                      <p className="text-xs text-muted-foreground">{transaction.date}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(transaction.created_at).toLocaleDateString()}
+                      </p>
                     </div>
                     <div className="text-right">
                       <span className={`text-sm font-medium ${
-                        transaction.type === 'deposit' ? 'text-green-600' : 'text-red-600'
+                        transaction.transaction_type === 'deposit' ? 'text-green-600' : 'text-red-600'
                       }`}>
-                        {transaction.type === 'deposit' ? '+' : '-'}${transaction.amount.toLocaleString()}
+                        {transaction.transaction_type === 'deposit' ? '+' : '-'}${transaction.amount.toLocaleString()}
                       </span>
                       <p className="text-xs text-muted-foreground">
-                        Balance: ${transaction.balance.toLocaleString()}
+                        Balance: ${transaction.balance_after?.toLocaleString() || '0'}
                       </p>
                     </div>
                   </div>
                 ))}
-                {savingsData.transactions.length === 0 && (
+                {transactions.length === 0 && (
                   <p className="text-center text-muted-foreground py-8">
                     No transactions yet. Make your first deposit!
                   </p>
@@ -196,20 +136,20 @@ const SavingsAccount = ({ savingsData, onUpdateSavings }: SavingsAccountProps) =
                 <Button
                   onClick={handleDeposit}
                   className="w-full"
-                  disabled={isLoading || !amount}
+                  disabled={loading || !amount || parseFloat(amount) <= 0}
                 >
                   <Plus className="w-4 h-4 mr-2" />
-                  Deposit
+                  {loading ? 'Processing...' : 'Deposit'}
                 </Button>
                 
                 <Button
                   onClick={handleWithdraw}
                   variant="outline"
                   className="w-full"
-                  disabled={isLoading || !amount}
+                  disabled={loading || !amount || parseFloat(amount) <= 0}
                 >
                   <Minus className="w-4 h-4 mr-2" />
-                  Withdraw
+                  {loading ? 'Processing...' : 'Withdraw'}
                 </Button>
               </div>
               
