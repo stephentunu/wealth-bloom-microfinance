@@ -9,7 +9,6 @@ import { Progress } from '@/components/ui/progress';
 import { Calculator, CheckCircle, AlertCircle } from 'lucide-react';
 import { useLoans } from '@/hooks/useLoans';
 import { useSavings } from '@/hooks/useSavings';
-import { supabase } from '@/integrations/supabase/client';
 
 interface LoanManagementProps {
   userId: string;
@@ -21,28 +20,42 @@ const LoanManagement = ({ userId, userProfile }: LoanManagementProps) => {
   const { savingsAccount } = useSavings(userId);
   const [loanAmount, setLoanAmount] = useState('');
   const [loanPurpose, setLoanPurpose] = useState('');
-  const [eligibility, setEligibility] = useState<any>(null);
 
-  useEffect(() => {
-    if (userId) {
-      fetchLoanEligibility();
+  // Calculate loan eligibility based on credit score and savings
+  const calculateEligibility = () => {
+    if (!userProfile || !savingsAccount) return null;
+    
+    const creditScore = userProfile.credit_score || 0;
+    const savingsBalance = savingsAccount.balance || 0;
+    
+    // Simple eligibility calculation
+    let maxLoanAmount = 0;
+    let recommendedRate = 0.15; // 15% default rate
+    
+    if (creditScore >= 750) {
+      maxLoanAmount = savingsBalance * 5;
+      recommendedRate = 0.08; // 8% for excellent credit
+    } else if (creditScore >= 700) {
+      maxLoanAmount = savingsBalance * 4;
+      recommendedRate = 0.10; // 10% for good credit
+    } else if (creditScore >= 650) {
+      maxLoanAmount = savingsBalance * 3;
+      recommendedRate = 0.12; // 12% for fair credit
+    } else if (creditScore >= 600) {
+      maxLoanAmount = savingsBalance * 2;
+      recommendedRate = 0.15; // 15% for poor credit
+    } else {
+      maxLoanAmount = savingsBalance * 1;
+      recommendedRate = 0.18; // 18% for very poor credit
     }
-  }, [userId, savingsAccount]);
-
-  const fetchLoanEligibility = async () => {
-    try {
-      const { data, error } = await supabase
-        .rpc('calculate_loan_eligibility' as any, { user_uuid: userId });
-
-      if (error) {
-        console.error('Error fetching loan eligibility:', error);
-      } else if (data && Array.isArray(data) && data.length > 0) {
-        setEligibility(data[0]);
-      }
-    } catch (error) {
-      console.error('Error:', error);
-    }
+    
+    return {
+      max_loan_amount: Math.max(maxLoanAmount, 100), // Minimum $100
+      recommended_rate: recommendedRate
+    };
   };
+
+  const eligibility = calculateEligibility();
 
   const calculateLoanDetails = (amount: number) => {
     if (!eligibility) return null;
