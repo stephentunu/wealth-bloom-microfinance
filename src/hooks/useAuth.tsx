@@ -61,8 +61,8 @@ export const useAuth = () => {
           description: "Failed to load user profile",
           variant: "destructive",
         });
-      } else {
-        setUserProfile(data as UserProfile);
+      } else if (data) {
+        setUserProfile(data as unknown as UserProfile);
       }
     } catch (error) {
       console.error('Error:', error);

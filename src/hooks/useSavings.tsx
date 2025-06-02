@@ -41,7 +41,7 @@ export const useSavings = (userId: string | undefined) => {
 
     try {
       const { data, error } = await supabase
-        .from('savings_accounts')
+        .from('savings_accounts' as any)
         .select('*')
         .eq('user_id', userId)
         .eq('is_active', true)
@@ -49,8 +49,8 @@ export const useSavings = (userId: string | undefined) => {
 
       if (error && error.code !== 'PGRST116') {
         console.error('Error fetching savings account:', error);
-      } else {
-        setSavingsAccount(data);
+      } else if (data) {
+        setSavingsAccount(data as unknown as SavingsAccount);
       }
     } catch (error) {
       console.error('Error:', error);
@@ -62,7 +62,7 @@ export const useSavings = (userId: string | undefined) => {
 
     try {
       const { data, error } = await supabase
-        .from('transactions')
+        .from('transactions' as any)
         .select('*')
         .eq('user_id', userId)
         .eq('account_type', 'savings')
@@ -70,8 +70,8 @@ export const useSavings = (userId: string | undefined) => {
 
       if (error) {
         console.error('Error fetching transactions:', error);
-      } else {
-        setTransactions(data || []);
+      } else if (data) {
+        setTransactions(data as unknown as Transaction[]);
       }
     } catch (error) {
       console.error('Error:', error);
@@ -88,7 +88,7 @@ export const useSavings = (userId: string | undefined) => {
 
       // Update savings account balance
       const { error: updateError } = await supabase
-        .from('savings_accounts')
+        .from('savings_accounts' as any)
         .update({ balance: newBalance })
         .eq('id', savingsAccount.id);
 
@@ -98,7 +98,7 @@ export const useSavings = (userId: string | undefined) => {
 
       // Create transaction record
       const { error: transactionError } = await supabase
-        .from('transactions')
+        .from('transactions' as any)
         .insert({
           user_id: userId,
           account_id: savingsAccount.id,
@@ -153,7 +153,7 @@ export const useSavings = (userId: string | undefined) => {
 
       // Update savings account balance
       const { error: updateError } = await supabase
-        .from('savings_accounts')
+        .from('savings_accounts' as any)
         .update({ balance: newBalance })
         .eq('id', savingsAccount.id);
 
@@ -163,7 +163,7 @@ export const useSavings = (userId: string | undefined) => {
 
       // Create transaction record
       const { error: transactionError } = await supabase
-        .from('transactions')
+        .from('transactions' as any)
         .insert({
           user_id: userId,
           account_id: savingsAccount.id,

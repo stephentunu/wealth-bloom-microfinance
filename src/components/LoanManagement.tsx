@@ -32,7 +32,7 @@ const LoanManagement = ({ userId, userProfile }: LoanManagementProps) => {
   const fetchLoanEligibility = async () => {
     try {
       const { data, error } = await supabase
-        .rpc('calculate_loan_eligibility', { user_uuid: userId });
+        .rpc('calculate_loan_eligibility' as any, { user_uuid: userId });
 
       if (error) {
         console.error('Error fetching loan eligibility:', error);

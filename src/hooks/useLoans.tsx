@@ -41,8 +41,8 @@ export const useLoans = (userId: string | undefined) => {
 
       if (error) {
         console.error('Error fetching loans:', error);
-      } else {
-        setLoans((data || []) as Loan[]);
+      } else if (data) {
+        setLoans(data as unknown as Loan[]);
       }
     } catch (error) {
       console.error('Error:', error);
