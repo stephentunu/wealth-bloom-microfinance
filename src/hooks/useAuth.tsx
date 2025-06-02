@@ -48,7 +48,7 @@ export const useAuth = () => {
 
   const fetchUserProfile = async (userId: string) => {
     try {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('user_profiles')
         .select('*')
         .eq('user_id', userId)
@@ -95,7 +95,7 @@ export const useAuth = () => {
 
       if (data.user) {
         // Update the profile with additional information
-        await (supabase as any)
+        await supabase
           .from('user_profiles')
           .update({
             phone: userData.phone,

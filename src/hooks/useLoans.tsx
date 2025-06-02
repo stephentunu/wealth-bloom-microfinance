@@ -33,7 +33,7 @@ export const useLoans = (userId: string | undefined) => {
     if (!userId) return;
 
     try {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('loans')
         .select('*')
         .eq('user_id', userId)
@@ -61,7 +61,7 @@ export const useLoans = (userId: string | undefined) => {
       const nextPaymentDate = new Date();
       nextPaymentDate.setMonth(nextPaymentDate.getMonth() + 1);
 
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('loans')
         .insert({
           user_id: userId,
@@ -81,7 +81,7 @@ export const useLoans = (userId: string | undefined) => {
       }
 
       // Create loan disbursement transaction
-      const { error: transactionError } = await (supabase as any)
+      const { error: transactionError } = await supabase
         .from('transactions')
         .insert({
           user_id: userId,
@@ -127,7 +127,7 @@ export const useLoans = (userId: string | undefined) => {
       const newStatus = newRemainingBalance === 0 ? 'paid_off' : 'active';
 
       // Update loan
-      const { error: updateError } = await (supabase as any)
+      const { error: updateError } = await supabase
         .from('loans')
         .update({
           remaining_balance: newRemainingBalance,
@@ -140,7 +140,7 @@ export const useLoans = (userId: string | undefined) => {
       }
 
       // Create payment transaction
-      const { error: transactionError } = await (supabase as any)
+      const { error: transactionError } = await supabase
         .from('transactions')
         .insert({
           user_id: userId,

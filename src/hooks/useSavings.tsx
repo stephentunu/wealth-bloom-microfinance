@@ -40,7 +40,7 @@ export const useSavings = (userId: string | undefined) => {
     if (!userId) return;
 
     try {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('savings_accounts')
         .select('*')
         .eq('user_id', userId)
@@ -61,7 +61,7 @@ export const useSavings = (userId: string | undefined) => {
     if (!userId) return;
 
     try {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('transactions')
         .select('*')
         .eq('user_id', userId)
@@ -87,7 +87,7 @@ export const useSavings = (userId: string | undefined) => {
       const referenceNumber = `DEP${Date.now()}`;
 
       // Update savings account balance
-      const { error: updateError } = await (supabase as any)
+      const { error: updateError } = await supabase
         .from('savings_accounts')
         .update({ balance: newBalance })
         .eq('id', savingsAccount.id);
@@ -97,7 +97,7 @@ export const useSavings = (userId: string | undefined) => {
       }
 
       // Create transaction record
-      const { error: transactionError } = await (supabase as any)
+      const { error: transactionError } = await supabase
         .from('transactions')
         .insert({
           user_id: userId,
@@ -152,7 +152,7 @@ export const useSavings = (userId: string | undefined) => {
       const referenceNumber = `WTH${Date.now()}`;
 
       // Update savings account balance
-      const { error: updateError } = await (supabase as any)
+      const { error: updateError } = await supabase
         .from('savings_accounts')
         .update({ balance: newBalance })
         .eq('id', savingsAccount.id);
@@ -162,7 +162,7 @@ export const useSavings = (userId: string | undefined) => {
       }
 
       // Create transaction record
-      const { error: transactionError } = await (supabase as any)
+      const { error: transactionError } = await supabase
         .from('transactions')
         .insert({
           user_id: userId,
