@@ -33,8 +33,8 @@ export const useLoans = (userId: string | undefined) => {
     if (!userId) return;
 
     try {
-      const { data, error } = await supabase
-        .from('loans' as any)
+      const { data, error } = await (supabase as any)
+        .from('loans')
         .select('*')
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
@@ -42,7 +42,7 @@ export const useLoans = (userId: string | undefined) => {
       if (error) {
         console.error('Error fetching loans:', error);
       } else if (data) {
-        setLoans(data as unknown as Loan[]);
+        setLoans(data);
       }
     } catch (error) {
       console.error('Error:', error);
@@ -61,8 +61,8 @@ export const useLoans = (userId: string | undefined) => {
       const nextPaymentDate = new Date();
       nextPaymentDate.setMonth(nextPaymentDate.getMonth() + 1);
 
-      const { error } = await supabase
-        .from('loans' as any)
+      const { error } = await (supabase as any)
+        .from('loans')
         .insert({
           user_id: userId,
           loan_number: loanNumber,
@@ -81,8 +81,8 @@ export const useLoans = (userId: string | undefined) => {
       }
 
       // Create loan disbursement transaction
-      const { error: transactionError } = await supabase
-        .from('transactions' as any)
+      const { error: transactionError } = await (supabase as any)
+        .from('transactions')
         .insert({
           user_id: userId,
           account_type: 'loan',
@@ -127,8 +127,8 @@ export const useLoans = (userId: string | undefined) => {
       const newStatus = newRemainingBalance === 0 ? 'paid_off' : 'active';
 
       // Update loan
-      const { error: updateError } = await supabase
-        .from('loans' as any)
+      const { error: updateError } = await (supabase as any)
+        .from('loans')
         .update({
           remaining_balance: newRemainingBalance,
           status: newStatus,
@@ -140,8 +140,8 @@ export const useLoans = (userId: string | undefined) => {
       }
 
       // Create payment transaction
-      const { error: transactionError } = await supabase
-        .from('transactions' as any)
+      const { error: transactionError } = await (supabase as any)
+        .from('transactions')
         .insert({
           user_id: userId,
           account_id: loanId,

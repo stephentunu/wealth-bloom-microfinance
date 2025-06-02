@@ -40,8 +40,8 @@ export const useSavings = (userId: string | undefined) => {
     if (!userId) return;
 
     try {
-      const { data, error } = await supabase
-        .from('savings_accounts' as any)
+      const { data, error } = await (supabase as any)
+        .from('savings_accounts')
         .select('*')
         .eq('user_id', userId)
         .eq('is_active', true)
@@ -50,7 +50,7 @@ export const useSavings = (userId: string | undefined) => {
       if (error && error.code !== 'PGRST116') {
         console.error('Error fetching savings account:', error);
       } else if (data) {
-        setSavingsAccount(data as unknown as SavingsAccount);
+        setSavingsAccount(data);
       }
     } catch (error) {
       console.error('Error:', error);
@@ -61,8 +61,8 @@ export const useSavings = (userId: string | undefined) => {
     if (!userId) return;
 
     try {
-      const { data, error } = await supabase
-        .from('transactions' as any)
+      const { data, error } = await (supabase as any)
+        .from('transactions')
         .select('*')
         .eq('user_id', userId)
         .eq('account_type', 'savings')
@@ -71,7 +71,7 @@ export const useSavings = (userId: string | undefined) => {
       if (error) {
         console.error('Error fetching transactions:', error);
       } else if (data) {
-        setTransactions(data as unknown as Transaction[]);
+        setTransactions(data);
       }
     } catch (error) {
       console.error('Error:', error);
@@ -87,8 +87,8 @@ export const useSavings = (userId: string | undefined) => {
       const referenceNumber = `DEP${Date.now()}`;
 
       // Update savings account balance
-      const { error: updateError } = await supabase
-        .from('savings_accounts' as any)
+      const { error: updateError } = await (supabase as any)
+        .from('savings_accounts')
         .update({ balance: newBalance })
         .eq('id', savingsAccount.id);
 
@@ -97,8 +97,8 @@ export const useSavings = (userId: string | undefined) => {
       }
 
       // Create transaction record
-      const { error: transactionError } = await supabase
-        .from('transactions' as any)
+      const { error: transactionError } = await (supabase as any)
+        .from('transactions')
         .insert({
           user_id: userId,
           account_id: savingsAccount.id,
@@ -152,8 +152,8 @@ export const useSavings = (userId: string | undefined) => {
       const referenceNumber = `WTH${Date.now()}`;
 
       // Update savings account balance
-      const { error: updateError } = await supabase
-        .from('savings_accounts' as any)
+      const { error: updateError } = await (supabase as any)
+        .from('savings_accounts')
         .update({ balance: newBalance })
         .eq('id', savingsAccount.id);
 
@@ -162,8 +162,8 @@ export const useSavings = (userId: string | undefined) => {
       }
 
       // Create transaction record
-      const { error: transactionError } = await supabase
-        .from('transactions' as any)
+      const { error: transactionError } = await (supabase as any)
+        .from('transactions')
         .insert({
           user_id: userId,
           account_id: savingsAccount.id,
