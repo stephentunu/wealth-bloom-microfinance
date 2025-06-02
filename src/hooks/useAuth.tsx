@@ -49,7 +49,7 @@ export const useAuth = () => {
   const fetchUserProfile = async (userId: string) => {
     try {
       const { data, error } = await supabase
-        .from('user_profiles')
+        .from('user_profiles' as any)
         .select('*')
         .eq('user_id', userId)
         .single();
@@ -62,7 +62,7 @@ export const useAuth = () => {
           variant: "destructive",
         });
       } else if (data) {
-        setUserProfile(data as UserProfile);
+        setUserProfile(data as unknown as UserProfile);
       }
     } catch (error) {
       console.error('Error:', error);
@@ -96,7 +96,7 @@ export const useAuth = () => {
       if (data.user) {
         // Update the profile with additional information
         await supabase
-          .from('user_profiles')
+          .from('user_profiles' as any)
           .update({
             phone: userData.phone,
             address: userData.address,
