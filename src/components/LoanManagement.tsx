@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -53,6 +52,22 @@ const LoanManagement = ({ userId, userProfile }: LoanManagementProps) => {
       max_loan_amount: Math.max(maxLoanAmount, 100), // Minimum $100
       recommended_rate: recommendedRate
     };
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return <Badge variant="secondary" className="text-yellow-600">Pending Approval</Badge>;
+      case 'approved':
+      case 'active':
+        return <Badge variant="default" className="text-green-600">Active</Badge>;
+      case 'rejected':
+        return <Badge variant="destructive">Rejected</Badge>;
+      case 'paid_off':
+        return <Badge variant="secondary" className="text-blue-600">Paid Off</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
+    }
   };
 
   const eligibility = calculateEligibility();
@@ -119,7 +134,7 @@ const LoanManagement = ({ userId, userProfile }: LoanManagementProps) => {
             <Card>
               <CardHeader>
                 <CardTitle>Your Loans</CardTitle>
-                <CardDescription>Track your loan repayments and balances</CardDescription>
+                <CardDescription>Track your loan applications and repayments</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -132,9 +147,7 @@ const LoanManagement = ({ userId, userProfile }: LoanManagementProps) => {
                             Applied: {new Date(loan.created_at).toLocaleDateString()}
                           </p>
                         </div>
-                        <Badge variant={loan.status === 'paid_off' ? 'secondary' : 'default'}>
-                          {loan.status === 'paid_off' ? 'Paid Off' : 'Active'}
-                        </Badge>
+                        {getStatusBadge(loan.status)}
                       </div>
                       
                       <div className="grid grid-cols-2 gap-4 text-sm">
@@ -156,23 +169,41 @@ const LoanManagement = ({ userId, userProfile }: LoanManagementProps) => {
                         </div>
                       </div>
 
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span>Progress</span>
-                          <span>{((loan.principal_amount - loan.remaining_balance) / loan.principal_amount * 100).toFixed(1)}%</span>
-                        </div>
-                        <Progress value={(loan.principal_amount - loan.remaining_balance) / loan.principal_amount * 100} />
-                      </div>
-
                       {loan.status === 'active' && (
-                        <Button
-                          onClick={() => handleLoanPayment(loan.id, loan.monthly_payment)}
-                          size="sm"
-                          className="w-full"
-                          disabled={loading}
-                        >
-                          Make Payment (${loan.monthly_payment.toLocaleString()})
-                        </Button>
+                        <>
+                          <div className="space-y-2">
+                            <div className="flex justify-between text-sm">
+                              <span>Progress</span>
+                              <span>{((loan.principal_amount - loan.remaining_balance) / loan.principal_amount * 100).toFixed(1)}%</span>
+                            </div>
+                            <Progress value={(loan.principal_amount - loan.remaining_balance) / loan.principal_amount * 100} />
+                          </div>
+
+                          <Button
+                            onClick={() => handleLoanPayment(loan.id, loan.monthly_payment)}
+                            size="sm"
+                            className="w-full"
+                            disabled={loading}
+                          >
+                            Make Payment (${loan.monthly_payment.toLocaleString()})
+                          </Button>
+                        </>
+                      )}
+
+                      {loan.status === 'pending' && (
+                        <div className="bg-yellow-50 border border-yellow-200 rounded p-3">
+                          <p className="text-sm text-yellow-800">
+                            Your loan application is pending admin approval. You will be notified once it's reviewed.
+                          </p>
+                        </div>
+                      )}
+
+                      {loan.status === 'rejected' && loan.rejection_reason && (
+                        <div className="bg-red-50 border border-red-200 rounded p-3">
+                          <p className="text-sm text-red-800">
+                            <strong>Rejection Reason:</strong> {loan.rejection_reason}
+                          </p>
+                        </div>
                       )}
                     </div>
                   ))}
@@ -304,7 +335,8 @@ const LoanManagement = ({ userId, userProfile }: LoanManagementProps) => {
               </Button>
 
               <div className="text-xs text-muted-foreground space-y-1">
-                <p>• Loan approval is instant</p>
+                <p>• Loan applications require admin approval</p>
+                <p>• You will be notified of the decision</p>
                 <p>• 12-month repayment term</p>
                 <p>• No prepayment penalties</p>
                 <p>• Rate based on credit score</p>

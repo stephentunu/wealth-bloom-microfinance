@@ -1,20 +1,22 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { LogOut, User, Home, CreditCard, Wallet } from 'lucide-react';
+import { LogOut, User, Home, CreditCard, Wallet, Shield } from 'lucide-react';
 
 interface NavbarProps {
   user: any;
+  isAdmin: boolean;
   onLogout: () => void;
   activeTab: string;
   onTabChange: (tab: string) => void;
 }
 
-const Navbar = ({ user, onLogout, activeTab, onTabChange }: NavbarProps) => {
+const Navbar = ({ user, isAdmin, onLogout, activeTab, onTabChange }: NavbarProps) => {
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
     { id: 'savings', label: 'Savings', icon: Wallet },
     { id: 'loans', label: 'Loans', icon: CreditCard },
+    ...(isAdmin ? [{ id: 'admin', label: 'Admin', icon: Shield }] : []),
   ];
 
   return (
@@ -50,8 +52,13 @@ const Navbar = ({ user, onLogout, activeTab, onTabChange }: NavbarProps) => {
             <div className="flex items-center space-x-2">
               <User className="w-5 h-5 text-gray-600" />
               <span className="text-sm font-medium text-gray-700">
-                {user?.name || 'User'}
+                {user?.full_name || 'User'}
               </span>
+              {isAdmin && (
+                <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                  Admin
+                </span>
+              )}
             </div>
             <Button
               onClick={onLogout}

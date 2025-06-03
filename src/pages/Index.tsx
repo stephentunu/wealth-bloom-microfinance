@@ -5,10 +5,11 @@ import Navbar from '@/components/Navbar';
 import Dashboard from '@/components/Dashboard';
 import SavingsAccount from '@/components/SavingsAccount';
 import LoanManagement from '@/components/LoanManagement';
+import AdminDashboard from '@/components/AdminDashboard';
 import { useAuth } from '@/hooks/useAuth';
 
 const Index = () => {
-  const { user, userProfile, loading, signOut } = useAuth();
+  const { user, userProfile, isAdmin, loading, signOut } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
 
   if (loading) {
@@ -37,6 +38,8 @@ const Index = () => {
         return <SavingsAccount userId={user.id} />;
       case 'loans':
         return <LoanManagement userId={user.id} userProfile={userProfile} />;
+      case 'admin':
+        return isAdmin ? <AdminDashboard /> : <Dashboard userId={user.id} userProfile={userProfile} />;
       default:
         return <Dashboard userId={user.id} userProfile={userProfile} />;
     }
@@ -46,6 +49,7 @@ const Index = () => {
     <div className="min-h-screen bg-gray-50">
       <Navbar
         user={userProfile}
+        isAdmin={isAdmin}
         onLogout={handleLogout}
         activeTab={activeTab}
         onTabChange={setActiveTab}

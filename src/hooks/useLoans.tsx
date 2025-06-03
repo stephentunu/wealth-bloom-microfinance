@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -15,6 +14,9 @@ interface Loan {
   next_payment_date: string;
   status: string;
   approved_at: string;
+  approved_by?: string;
+  approval_date?: string;
+  rejection_reason?: string;
   created_at: string;
 }
 
@@ -72,36 +74,18 @@ export const useLoans = (userId: string | undefined) => {
           monthly_payment: monthlyPayment,
           remaining_balance: amount,
           next_payment_date: nextPaymentDate.toISOString().split('T')[0],
-          status: 'active',
-          approved_at: new Date().toISOString(),
+          status: 'pending', // Changed from 'active' to 'pending'
         });
 
       if (error) {
         throw error;
       }
 
-      // Create loan disbursement transaction
-      const { error: transactionError } = await supabase
-        .from('transactions')
-        .insert({
-          user_id: userId,
-          account_type: 'loan',
-          transaction_type: 'loan_disbursement',
-          amount,
-          description: `Loan disbursement - ${purpose}`,
-          reference_number: `DISB${Date.now()}`,
-          balance_after: amount,
-        });
-
-      if (transactionError) {
-        console.error('Transaction error:', transactionError);
-      }
-
       await fetchLoans();
 
       toast({
-        title: "Loan approved!",
-        description: `Your loan of $${amount.toLocaleString()} has been approved`,
+        title: "Loan application submitted!",
+        description: `Your loan application for $${amount.toLocaleString()} is pending admin approval`,
       });
     } catch (error) {
       console.error('Loan application error:', error);

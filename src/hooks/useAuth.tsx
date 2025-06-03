@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
@@ -15,9 +14,14 @@ interface UserProfile {
   is_verified: boolean;
 }
 
+interface UserRole {
+  role: string;
+}
+
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [userRole, setUserRole] = useState<UserRole | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
@@ -27,6 +31,7 @@ export const useAuth = () => {
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchUserProfile(session.user.id);
+        fetchUserRole(session.user.id);
       } else {
         setLoading(false);
       }
@@ -37,8 +42,10 @@ export const useAuth = () => {
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchUserProfile(session.user.id);
+        fetchUserRole(session.user.id);
       } else {
         setUserProfile(null);
+        setUserRole(null);
         setLoading(false);
       }
     });
@@ -68,6 +75,33 @@ export const useAuth = () => {
       console.error('Error:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchUserRole = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching user role:', error);
+      } else if (data) {
+        setUserRole(data);
+      } else {
+        // Create default user role if none exists
+        const { error: insertError } = await supabase
+          .from('user_roles')
+          .insert({ user_id: userId, role: 'user' });
+
+        if (!insertError) {
+          setUserRole({ role: 'user' });
+        }
+      }
+    } catch (error) {
+      console.error('Error:', error);
     }
   };
 
@@ -164,6 +198,7 @@ export const useAuth = () => {
       await supabase.auth.signOut();
       setUser(null);
       setUserProfile(null);
+      setUserRole(null);
       toast({
         title: "Signed out",
         description: "You have been signed out successfully",
@@ -181,9 +216,11 @@ export const useAuth = () => {
   return {
     user,
     userProfile,
+    userRole,
     loading,
     signUp,
     signIn,
     signOut,
+    isAdmin: userRole?.role === 'admin',
   };
 };

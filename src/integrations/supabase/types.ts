@@ -114,9 +114,35 @@ export type Database = {
         }
         Relationships: []
       }
+      conversations: {
+        Row: {
+          created_at: string
+          id: string
+          last_message_at: string | null
+          participant_1: string
+          participant_2: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_message_at?: string | null
+          participant_1: string
+          participant_2: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_message_at?: string | null
+          participant_1?: string
+          participant_2?: string
+        }
+        Relationships: []
+      }
       loans: {
         Row: {
+          approval_date: string | null
           approved_at: string | null
+          approved_by: string | null
           created_at: string
           id: string
           interest_rate: number
@@ -124,6 +150,7 @@ export type Database = {
           monthly_payment: number
           next_payment_date: string
           principal_amount: number
+          rejection_reason: string | null
           remaining_balance: number
           status: string
           term_months: number
@@ -131,7 +158,9 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          approval_date?: string | null
           approved_at?: string | null
+          approved_by?: string | null
           created_at?: string
           id?: string
           interest_rate: number
@@ -139,6 +168,7 @@ export type Database = {
           monthly_payment: number
           next_payment_date: string
           principal_amount: number
+          rejection_reason?: string | null
           remaining_balance: number
           status?: string
           term_months: number
@@ -146,7 +176,9 @@ export type Database = {
           user_id: string
         }
         Update: {
+          approval_date?: string | null
           approved_at?: string | null
+          approved_by?: string | null
           created_at?: string
           id?: string
           interest_rate?: number
@@ -154,6 +186,7 @@ export type Database = {
           monthly_payment?: number
           next_payment_date?: string
           principal_amount?: number
+          rejection_reason?: string | null
           remaining_balance?: number
           status?: string
           term_months?: number
@@ -198,6 +231,33 @@ export type Database = {
           phone_number?: string
           timestamp?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          read_at: string | null
+          receiver_id: string
+          sender_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          receiver_id: string
+          sender_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          receiver_id?: string
+          sender_id?: string
         }
         Relationships: []
       }
@@ -381,12 +441,36 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_admin: {
+        Args: { user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
