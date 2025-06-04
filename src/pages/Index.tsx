@@ -39,9 +39,9 @@ const Index = () => {
       case 'loans':
         return <LoanManagement userId={user.id} userProfile={userProfile} />;
       case 'admin':
-        return isAdmin ? <AdminDashboard /> : <Dashboard userId={user.id} userProfile={userProfile} />;
+        return isAdmin ? <AdminDashboard /> : <Dashboard userId={user.id} userProfile={userProfile} onTabChange={setActiveTab} activeTab={activeTab} isAdmin={isAdmin} />;
       default:
-        return <Dashboard userId={user.id} userProfile={userProfile} />;
+        return <Dashboard userId={user.id} userProfile={userProfile} onTabChange={setActiveTab} activeTab={activeTab} isAdmin={isAdmin} />;
     }
   };
 

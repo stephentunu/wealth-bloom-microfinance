@@ -6,13 +6,17 @@ import { Badge } from '@/components/ui/badge';
 import { Wallet, TrendingUp, Calendar, CreditCard } from 'lucide-react';
 import { useSavings } from '@/hooks/useSavings';
 import { useLoans } from '@/hooks/useLoans';
+import QuickNavigation from '@/components/QuickNavigation';
 
 interface DashboardProps {
   userId: string;
   userProfile: any;
+  onTabChange?: (tab: string) => void;
+  activeTab?: string;
+  isAdmin?: boolean;
 }
 
-const Dashboard = ({ userId, userProfile }: DashboardProps) => {
+const Dashboard = ({ userId, userProfile, onTabChange, activeTab = 'dashboard', isAdmin = false }: DashboardProps) => {
   const { savingsAccount, transactions } = useSavings(userId);
   const { loans } = useLoans(userId);
 
@@ -32,6 +36,15 @@ const Dashboard = ({ userId, userProfile }: DashboardProps) => {
           {userProfile.is_verified ? 'Account Verified' : 'Pending Verification'}
         </Badge>
       </div>
+
+      {/* Add Quick Navigation */}
+      {onTabChange && (
+        <QuickNavigation 
+          activeTab={activeTab} 
+          onTabChange={onTabChange} 
+          isAdmin={isAdmin} 
+        />
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card>
