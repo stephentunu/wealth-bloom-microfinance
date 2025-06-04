@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,12 +6,16 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Minus, TrendingUp } from 'lucide-react';
 import { useSavings } from '@/hooks/useSavings';
+import QuickNavigation from '@/components/QuickNavigation';
 
 interface SavingsAccountProps {
   userId: string;
+  onTabChange?: (tab: string) => void;
+  activeTab?: string;
+  isAdmin?: boolean;
 }
 
-const SavingsAccount = ({ userId }: SavingsAccountProps) => {
+const SavingsAccount = ({ userId, onTabChange, activeTab = 'savings', isAdmin = false }: SavingsAccountProps) => {
   const { savingsAccount, transactions, loading, deposit, withdraw } = useSavings(userId);
   const [amount, setAmount] = useState('');
 
@@ -54,6 +57,15 @@ const SavingsAccount = ({ userId }: SavingsAccountProps) => {
           {(savingsAccount.interest_rate * 100).toFixed(1)}% APY
         </Badge>
       </div>
+
+      {/* Add Quick Navigation */}
+      {onTabChange && (
+        <QuickNavigation 
+          activeTab={activeTab} 
+          onTabChange={onTabChange} 
+          isAdmin={isAdmin} 
+        />
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
