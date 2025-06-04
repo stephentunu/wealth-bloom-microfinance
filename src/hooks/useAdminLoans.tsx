@@ -23,7 +23,7 @@ interface LoanWithUser {
     full_name: string;
     email: string;
     credit_score: number;
-  };
+  } | null;
 }
 
 export const useAdminLoans = () => {
@@ -58,7 +58,9 @@ export const useAdminLoans = () => {
           variant: "destructive",
         });
       } else if (data) {
-        setLoans(data);
+        // Filter out loans without user profiles
+        const validLoans = data.filter(loan => loan.user_profiles !== null) as LoanWithUser[];
+        setLoans(validLoans);
       }
     } catch (error) {
       console.error('Error:', error);
