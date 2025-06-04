@@ -27,7 +27,7 @@ interface LoanWithUser {
   };
 }
 
-// Type for the raw Supabase response
+// Type for the raw Supabase response that accounts for possible join errors
 interface RawLoanData {
   id: string;
   user_id: string;
@@ -49,7 +49,7 @@ interface RawLoanData {
     full_name: string;
     email: string;
     credit_score: number;
-  } | null;
+  } | null | any; // Allow any type to handle Supabase join errors
 }
 
 export const useAdminLoans = () => {
@@ -87,7 +87,7 @@ export const useAdminLoans = () => {
         // Filter and transform loans to ensure valid user profiles
         const validLoans: LoanWithUser[] = [];
         
-        for (const loan of data as RawLoanData[]) {
+        for (const loan of data as any[]) {
           if (loan.user_profiles && 
               typeof loan.user_profiles === 'object' && 
               !Array.isArray(loan.user_profiles) &&
