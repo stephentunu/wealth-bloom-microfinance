@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -23,7 +22,7 @@ interface LoanWithUser {
     full_name: string;
     email: string;
     credit_score: number;
-  } | null;
+  };
 }
 
 export const useAdminLoans = () => {
@@ -58,8 +57,14 @@ export const useAdminLoans = () => {
           variant: "destructive",
         });
       } else if (data) {
-        // Filter out loans without user profiles
-        const validLoans = data.filter(loan => loan.user_profiles !== null) as LoanWithUser[];
+        // Filter and type-check loans to ensure valid user profiles
+        const validLoans = data.filter((loan): loan is LoanWithUser => {
+          return loan.user_profiles !== null && 
+                 typeof loan.user_profiles === 'object' && 
+                 'full_name' in loan.user_profiles &&
+                 'email' in loan.user_profiles &&
+                 'credit_score' in loan.user_profiles;
+        });
         setLoans(validLoans);
       }
     } catch (error) {
