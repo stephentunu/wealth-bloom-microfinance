@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,7 +20,7 @@ interface LoanManagementProps {
 }
 
 const LoanManagement = ({ userId, userProfile, onTabChange, activeTab = 'loans', isAdmin = false }: LoanManagementProps) => {
-  const { loans, applyLoan, loading } = useLoans(userId);
+  const { loans, applyForLoan, loading } = useLoans(userId);
   const [amount, setAmount] = useState('');
   const [duration, setDuration] = useState('');
   const [loanType, setLoanType] = useState('');
@@ -29,7 +30,19 @@ const LoanManagement = ({ userId, userProfile, onTabChange, activeTab = 'loans',
     const loanDuration = parseInt(duration);
 
     if (loanAmount > 0 && loanDuration > 0 && loanType) {
-      await applyLoan(loanAmount, loanDuration, loanType);
+      // Calculate interest rate based on credit score
+      let interestRate = 12; // Default rate
+      if (userProfile?.credit_score >= 750) {
+        interestRate = 8;
+      } else if (userProfile?.credit_score >= 700) {
+        interestRate = 10;
+      } else if (userProfile?.credit_score >= 650) {
+        interestRate = 12;
+      } else {
+        interestRate = 15;
+      }
+
+      await applyForLoan(loanAmount, loanType, interestRate);
       setAmount('');
       setDuration('');
       setLoanType('');
@@ -133,7 +146,7 @@ const LoanManagement = ({ userId, userProfile, onTabChange, activeTab = 'loans',
                     <div key={loan.id} className="border rounded-md p-4">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="font-medium">{loan.loan_type} Loan</p>
+                          <p className="font-medium">Personal Loan</p>
                           <p className="text-sm text-gray-500">
                             Loaned: ${loan.principal_amount.toLocaleString()}
                           </p>

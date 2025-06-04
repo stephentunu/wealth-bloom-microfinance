@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,9 +7,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Users, DollarSign, TrendingUp, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Users, DollarSign, TrendingUp, AlertCircle, CheckCircle, XCircle, Clock, User } from 'lucide-react';
 import { useAdminLoans } from '@/hooks/useAdminLoans';
 import QuickNavigation from '@/components/QuickNavigation';
+import NavigationButtons from '@/components/NavigationButtons';
 
 interface AdminDashboardProps {
   onTabChange?: (tab: string) => void;
@@ -67,9 +70,15 @@ const AdminDashboard = ({ onTabChange, activeTab = 'admin', isAdmin = false }: A
           <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
           <p className="text-gray-600">Manage users, loans, and system settings</p>
         </div>
-        <Badge variant="outline" className="text-purple-600 border-purple-600">
-          Administrator Access
-        </Badge>
+        <div className="flex items-center space-x-4">
+          <NavigationButtons 
+            onTabChange={onTabChange}
+            backButtonLabel="Back to Dashboard"
+          />
+          <Badge variant="outline" className="text-purple-600 border-purple-600">
+            Administrator Access
+          </Badge>
+        </div>
       </div>
 
       {/* Add Quick Navigation */}
