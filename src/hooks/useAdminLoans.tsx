@@ -27,6 +27,31 @@ interface LoanWithUser {
   };
 }
 
+// Type for the raw Supabase response
+interface RawLoanData {
+  id: string;
+  user_id: string;
+  loan_number: string;
+  principal_amount: number;
+  interest_rate: number;
+  term_months: number;
+  monthly_payment: number;
+  remaining_balance: number;
+  next_payment_date: string;
+  status: string;
+  approved_at: string;
+  approved_by?: string;
+  approval_date?: string;
+  rejection_reason?: string;
+  created_at: string;
+  updated_at: string;
+  user_profiles: {
+    full_name: string;
+    email: string;
+    credit_score: number;
+  } | null;
+}
+
 export const useAdminLoans = () => {
   const [loans, setLoans] = useState<LoanWithUser[]>([]);
   const [loading, setLoading] = useState(false);
@@ -59,17 +84,20 @@ export const useAdminLoans = () => {
           variant: "destructive",
         });
       } else if (data) {
-        // Filter and type-check loans to ensure valid user profiles
+        // Filter and transform loans to ensure valid user profiles
         const validLoans: LoanWithUser[] = [];
         
-        for (const loan of data) {
+        for (const loan of data as RawLoanData[]) {
           if (loan.user_profiles && 
               typeof loan.user_profiles === 'object' && 
               !Array.isArray(loan.user_profiles) &&
               'full_name' in loan.user_profiles &&
               'email' in loan.user_profiles &&
               'credit_score' in loan.user_profiles) {
-            validLoans.push(loan as LoanWithUser);
+            validLoans.push({
+              ...loan,
+              user_profiles: loan.user_profiles
+            } as LoanWithUser);
           }
         }
         
