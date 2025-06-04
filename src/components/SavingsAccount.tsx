@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Plus, Minus, TrendingUp } from 'lucide-react';
 import { useSavings } from '@/hooks/useSavings';
 import QuickNavigation from '@/components/QuickNavigation';
+import NavigationButtons from '@/components/NavigationButtons';
 
 interface SavingsAccountProps {
   userId: string;
@@ -53,9 +55,15 @@ const SavingsAccount = ({ userId, onTabChange, activeTab = 'savings', isAdmin = 
           <h1 className="text-3xl font-bold text-gray-900">Savings Account</h1>
           <p className="text-gray-600">Manage your savings and earn interest</p>
         </div>
-        <Badge variant="outline" className="text-green-600 border-green-600">
-          {(savingsAccount.interest_rate * 100).toFixed(1)}% APY
-        </Badge>
+        <div className="flex items-center space-x-4">
+          <NavigationButtons 
+            onTabChange={onTabChange}
+            backButtonLabel="Back to Dashboard"
+          />
+          <Badge variant="outline" className="text-green-600 border-green-600">
+            {(savingsAccount.interest_rate * 100).toFixed(1)}% APY
+          </Badge>
+        </div>
       </div>
 
       {/* Add Quick Navigation */}

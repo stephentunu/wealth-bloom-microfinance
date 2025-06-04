@@ -7,6 +7,7 @@ import { Wallet, TrendingUp, Calendar, CreditCard } from 'lucide-react';
 import { useSavings } from '@/hooks/useSavings';
 import { useLoans } from '@/hooks/useLoans';
 import QuickNavigation from '@/components/QuickNavigation';
+import NavigationButtons from '@/components/NavigationButtons';
 
 interface DashboardProps {
   userId: string;
@@ -32,9 +33,15 @@ const Dashboard = ({ userId, userProfile, onTabChange, activeTab = 'dashboard', 
           <h1 className="text-3xl font-bold text-gray-900">Welcome back, {userProfile.full_name}!</h1>
           <p className="text-gray-600">Here's your financial overview</p>
         </div>
-        <Badge variant="outline" className={userProfile.is_verified ? "text-green-600 border-green-600" : "text-orange-600 border-orange-600"}>
-          {userProfile.is_verified ? 'Account Verified' : 'Pending Verification'}
-        </Badge>
+        <div className="flex items-center space-x-4">
+          <NavigationButtons 
+            onTabChange={onTabChange}
+            showBackButton={false}
+          />
+          <Badge variant="outline" className={userProfile.is_verified ? "text-green-600 border-green-600" : "text-orange-600 border-orange-600"}>
+            {userProfile.is_verified ? 'Account Verified' : 'Pending Verification'}
+          </Badge>
+        </div>
       </div>
 
       {/* Add Quick Navigation */}

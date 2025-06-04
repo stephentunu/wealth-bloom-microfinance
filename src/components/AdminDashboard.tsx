@@ -1,15 +1,22 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { CheckCircle, XCircle, Clock, User, DollarSign } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Users, DollarSign, TrendingUp, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
 import { useAdminLoans } from '@/hooks/useAdminLoans';
+import QuickNavigation from '@/components/QuickNavigation';
 
-const AdminDashboard = () => {
+interface AdminDashboardProps {
+  onTabChange?: (tab: string) => void;
+  activeTab?: string;
+  isAdmin?: boolean;
+}
+
+const AdminDashboard = ({ onTabChange, activeTab = 'admin', isAdmin = false }: AdminDashboardProps) => {
   const { loans, loading, approveLoan, rejectLoan } = useAdminLoans();
   const [rejectionReason, setRejectionReason] = useState('');
   const [rejectingLoanId, setRejectingLoanId] = useState<string | null>(null);
@@ -58,9 +65,21 @@ const AdminDashboard = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-          <p className="text-gray-600">Manage loan applications and approvals</p>
+          <p className="text-gray-600">Manage users, loans, and system settings</p>
         </div>
+        <Badge variant="outline" className="text-purple-600 border-purple-600">
+          Administrator Access
+        </Badge>
       </div>
+
+      {/* Add Quick Navigation */}
+      {onTabChange && (
+        <QuickNavigation 
+          activeTab={activeTab} 
+          onTabChange={onTabChange} 
+          isAdmin={isAdmin} 
+        />
+      )}
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
