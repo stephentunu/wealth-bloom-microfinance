@@ -12,6 +12,7 @@ interface NavbarProps {
 }
 
 const Navbar = ({ user, isAdmin, onLogout, activeTab, onTabChange }: NavbarProps) => {
+  // Always show basic navigation items, admin item only if user is admin
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
     { id: 'savings', label: 'Savings', icon: Wallet },
@@ -28,17 +29,22 @@ const Navbar = ({ user, isAdmin, onLogout, activeTab, onTabChange }: NavbarProps
               <h1 className="text-2xl font-bold text-blue-600">WealthBloom</h1>
               <p className="text-xs text-gray-500">Microfinance Solutions</p>
             </div>
-            <div className="hidden md:ml-8 md:flex md:space-x-8">
+            
+            {/* Navigation Items - Always visible */}
+            <div className="ml-8 flex space-x-8">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 return (
                   <button
                     key={item.id}
-                    onClick={() => onTabChange(item.id)}
-                    className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors ${
+                    onClick={() => {
+                      console.log(`Navigating to: ${item.id}`);
+                      onTabChange(item.id);
+                    }}
+                    className={`inline-flex items-center px-3 py-2 border-b-2 text-sm font-medium transition-colors hover:bg-gray-50 ${
                       activeTab === item.id
-                        ? 'border-blue-500 text-blue-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                        ? 'border-blue-500 text-blue-600 bg-blue-50'
+                        : 'border-transparent text-gray-700 hover:text-blue-600 hover:border-gray-300'
                     }`}
                   >
                     <Icon className="w-4 h-4 mr-2" />
@@ -48,6 +54,7 @@ const Navbar = ({ user, isAdmin, onLogout, activeTab, onTabChange }: NavbarProps
               })}
             </div>
           </div>
+          
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
               <User className="w-5 h-5 text-gray-600" />
