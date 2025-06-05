@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -19,37 +18,11 @@ interface LoanWithUser {
   approval_date?: string;
   rejection_reason?: string;
   created_at: string;
-  updated_at: string;
   user_profiles: {
     full_name: string;
     email: string;
     credit_score: number;
   };
-}
-
-// Type for the raw Supabase response that accounts for possible join errors
-interface RawLoanData {
-  id: string;
-  user_id: string;
-  loan_number: string;
-  principal_amount: number;
-  interest_rate: number;
-  term_months: number;
-  monthly_payment: number;
-  remaining_balance: number;
-  next_payment_date: string;
-  status: string;
-  approved_at: string;
-  approved_by?: string;
-  approval_date?: string;
-  rejection_reason?: string;
-  created_at: string;
-  updated_at: string;
-  user_profiles: {
-    full_name: string;
-    email: string;
-    credit_score: number;
-  } | null | any; // Allow any type to handle Supabase join errors
 }
 
 export const useAdminLoans = () => {
@@ -84,23 +57,14 @@ export const useAdminLoans = () => {
           variant: "destructive",
         });
       } else if (data) {
-        // Filter and transform loans to ensure valid user profiles
-        const validLoans: LoanWithUser[] = [];
-        
-        for (const loan of data as any[]) {
-          if (loan.user_profiles && 
-              typeof loan.user_profiles === 'object' && 
-              !Array.isArray(loan.user_profiles) &&
-              'full_name' in loan.user_profiles &&
-              'email' in loan.user_profiles &&
-              'credit_score' in loan.user_profiles) {
-            validLoans.push({
-              ...loan,
-              user_profiles: loan.user_profiles
-            } as LoanWithUser);
-          }
-        }
-        
+        // Filter and type-check loans to ensure valid user profiles
+        const validLoans = data.filter((loan): loan is LoanWithUser => {
+          return loan.user_profiles !== null && 
+                 typeof loan.user_profiles === 'object' && 
+                 'full_name' in loan.user_profiles &&
+                 'email' in loan.user_profiles &&
+                 'credit_score' in loan.user_profiles;
+        });
         setLoans(validLoans);
       }
     } catch (error) {

@@ -6,18 +6,13 @@ import { Badge } from '@/components/ui/badge';
 import { Wallet, TrendingUp, Calendar, CreditCard } from 'lucide-react';
 import { useSavings } from '@/hooks/useSavings';
 import { useLoans } from '@/hooks/useLoans';
-import QuickNavigation from '@/components/QuickNavigation';
-import NavigationButtons from '@/components/NavigationButtons';
 
 interface DashboardProps {
   userId: string;
   userProfile: any;
-  onTabChange?: (tab: string) => void;
-  activeTab?: string;
-  isAdmin?: boolean;
 }
 
-const Dashboard = ({ userId, userProfile, onTabChange, activeTab = 'dashboard', isAdmin = false }: DashboardProps) => {
+const Dashboard = ({ userId, userProfile }: DashboardProps) => {
   const { savingsAccount, transactions } = useSavings(userId);
   const { loans } = useLoans(userId);
 
@@ -33,25 +28,10 @@ const Dashboard = ({ userId, userProfile, onTabChange, activeTab = 'dashboard', 
           <h1 className="text-3xl font-bold text-gray-900">Welcome back, {userProfile.full_name}!</h1>
           <p className="text-gray-600">Here's your financial overview</p>
         </div>
-        <div className="flex items-center space-x-4">
-          <NavigationButtons 
-            onTabChange={onTabChange}
-            showBackButton={false}
-          />
-          <Badge variant="outline" className={userProfile.is_verified ? "text-green-600 border-green-600" : "text-orange-600 border-orange-600"}>
-            {userProfile.is_verified ? 'Account Verified' : 'Pending Verification'}
-          </Badge>
-        </div>
+        <Badge variant="outline" className={userProfile.is_verified ? "text-green-600 border-green-600" : "text-orange-600 border-orange-600"}>
+          {userProfile.is_verified ? 'Account Verified' : 'Pending Verification'}
+        </Badge>
       </div>
-
-      {/* Add Quick Navigation */}
-      {onTabChange && (
-        <QuickNavigation 
-          activeTab={activeTab} 
-          onTabChange={onTabChange} 
-          isAdmin={isAdmin} 
-        />
-      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card>

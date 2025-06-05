@@ -7,17 +7,12 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Minus, TrendingUp } from 'lucide-react';
 import { useSavings } from '@/hooks/useSavings';
-import QuickNavigation from '@/components/QuickNavigation';
-import NavigationButtons from '@/components/NavigationButtons';
 
 interface SavingsAccountProps {
   userId: string;
-  onTabChange?: (tab: string) => void;
-  activeTab?: string;
-  isAdmin?: boolean;
 }
 
-const SavingsAccount = ({ userId, onTabChange, activeTab = 'savings', isAdmin = false }: SavingsAccountProps) => {
+const SavingsAccount = ({ userId }: SavingsAccountProps) => {
   const { savingsAccount, transactions, loading, deposit, withdraw } = useSavings(userId);
   const [amount, setAmount] = useState('');
 
@@ -55,25 +50,10 @@ const SavingsAccount = ({ userId, onTabChange, activeTab = 'savings', isAdmin = 
           <h1 className="text-3xl font-bold text-gray-900">Savings Account</h1>
           <p className="text-gray-600">Manage your savings and earn interest</p>
         </div>
-        <div className="flex items-center space-x-4">
-          <NavigationButtons 
-            onTabChange={onTabChange}
-            backButtonLabel="Back to Dashboard"
-          />
-          <Badge variant="outline" className="text-green-600 border-green-600">
-            {(savingsAccount.interest_rate * 100).toFixed(1)}% APY
-          </Badge>
-        </div>
+        <Badge variant="outline" className="text-green-600 border-green-600">
+          {(savingsAccount.interest_rate * 100).toFixed(1)}% APY
+        </Badge>
       </div>
-
-      {/* Add Quick Navigation */}
-      {onTabChange && (
-        <QuickNavigation 
-          activeTab={activeTab} 
-          onTabChange={onTabChange} 
-          isAdmin={isAdmin} 
-        />
-      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
