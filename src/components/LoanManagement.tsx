@@ -8,17 +8,27 @@ import { Progress } from '@/components/ui/progress';
 import { Calculator, CheckCircle, AlertCircle } from 'lucide-react';
 import { useLoans } from '@/hooks/useLoans';
 import { useSavings } from '@/hooks/useSavings';
+import NavigationButtons from '@/components/NavigationButtons';
 
 interface LoanManagementProps {
   userId: string;
   userProfile: any;
+  onTabChange?: (tab: string) => void;
 }
 
-const LoanManagement = ({ userId, userProfile }: LoanManagementProps) => {
+const LoanManagement = ({ userId, userProfile, onTabChange }: LoanManagementProps) => {
   const { loans, loading, applyForLoan, makePayment } = useLoans(userId);
   const { savingsAccount } = useSavings(userId);
   const [loanAmount, setLoanAmount] = useState('');
   const [loanPurpose, setLoanPurpose] = useState('');
+
+  const handleHome = () => {
+    if (onTabChange) onTabChange('dashboard');
+  };
+
+  const handleBack = () => {
+    if (onTabChange) onTabChange('dashboard');
+  };
 
   // Calculate loan eligibility based on credit score and savings
   const calculateEligibility = () => {
@@ -106,6 +116,10 @@ const LoanManagement = ({ userId, userProfile }: LoanManagementProps) => {
   if (!eligibility) {
     return (
       <div className="space-y-6">
+        <NavigationButtons 
+          onHome={handleHome}
+          onBack={handleBack}
+        />
         <div className="text-center py-12">
           <h2 className="text-2xl font-bold text-gray-900">Loading loan information...</h2>
           <p className="text-gray-600 mt-2">Please wait while we calculate your eligibility.</p>
@@ -118,6 +132,11 @@ const LoanManagement = ({ userId, userProfile }: LoanManagementProps) => {
 
   return (
     <div className="space-y-6">
+      <NavigationButtons 
+        onHome={handleHome}
+        onBack={handleBack}
+      />
+      
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Loan Management</h1>

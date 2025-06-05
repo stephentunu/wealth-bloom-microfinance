@@ -8,11 +8,24 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { CheckCircle, XCircle, Clock, User, DollarSign } from 'lucide-react';
 import { useAdminLoans } from '@/hooks/useAdminLoans';
+import NavigationButtons from '@/components/NavigationButtons';
 
-const AdminDashboard = () => {
+interface AdminDashboardProps {
+  onTabChange?: (tab: string) => void;
+}
+
+const AdminDashboard = ({ onTabChange }: AdminDashboardProps) => {
   const { loans, loading, approveLoan, rejectLoan } = useAdminLoans();
   const [rejectionReason, setRejectionReason] = useState('');
   const [rejectingLoanId, setRejectingLoanId] = useState<string | null>(null);
+
+  const handleHome = () => {
+    if (onTabChange) onTabChange('dashboard');
+  };
+
+  const handleBack = () => {
+    if (onTabChange) onTabChange('dashboard');
+  };
 
   const pendingLoans = loans.filter(loan => loan.status === 'pending');
   const approvedLoans = loans.filter(loan => loan.status === 'active' || loan.status === 'approved');
@@ -44,10 +57,16 @@ const AdminDashboard = () => {
 
   if (loading && loans.length === 0) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading admin dashboard...</p>
+      <div className="space-y-6">
+        <NavigationButtons 
+          onHome={handleHome}
+          onBack={handleBack}
+        />
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading admin dashboard...</p>
+          </div>
         </div>
       </div>
     );
@@ -55,6 +74,11 @@ const AdminDashboard = () => {
 
   return (
     <div className="space-y-6">
+      <NavigationButtons 
+        onHome={handleHome}
+        onBack={handleBack}
+      />
+      
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>

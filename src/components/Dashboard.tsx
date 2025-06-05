@@ -6,13 +6,15 @@ import { Badge } from '@/components/ui/badge';
 import { Wallet, TrendingUp, Calendar, CreditCard } from 'lucide-react';
 import { useSavings } from '@/hooks/useSavings';
 import { useLoans } from '@/hooks/useLoans';
+import NavigationButtons from '@/components/NavigationButtons';
 
 interface DashboardProps {
   userId: string;
   userProfile: any;
+  onTabChange?: (tab: string) => void;
 }
 
-const Dashboard = ({ userId, userProfile }: DashboardProps) => {
+const Dashboard = ({ userId, userProfile, onTabChange }: DashboardProps) => {
   const { savingsAccount, transactions } = useSavings(userId);
   const { loans } = useLoans(userId);
 
@@ -21,8 +23,23 @@ const Dashboard = ({ userId, userProfile }: DashboardProps) => {
   const creditUtilization = savingsAccount?.balance ? (totalOwed / savingsAccount.balance) * 100 : 0;
   const loanCapacity = savingsAccount ? Math.max(0, savingsAccount.balance * 0.8 - totalOwed) : 0;
 
+  const handleHome = () => {
+    if (onTabChange) onTabChange('dashboard');
+  };
+
+  const handleBack = () => {
+    // Dashboard is the home page, so back goes to dashboard
+    if (onTabChange) onTabChange('dashboard');
+  };
+
   return (
     <div className="space-y-6">
+      <NavigationButtons 
+        onHome={handleHome}
+        onBack={handleBack}
+        showBack={false}
+      />
+      
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Welcome back, {userProfile.full_name}!</h1>

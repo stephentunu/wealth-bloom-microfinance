@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -18,11 +19,12 @@ interface LoanWithUser {
   approval_date?: string;
   rejection_reason?: string;
   created_at: string;
+  updated_at?: string;
   user_profiles: {
     full_name: string;
     email: string;
     credit_score: number;
-  };
+  } | null;
 }
 
 export const useAdminLoans = () => {

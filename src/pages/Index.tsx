@@ -35,13 +35,13 @@ const Index = () => {
   const renderContent = () => {
     switch (activeTab) {
       case 'savings':
-        return <SavingsAccount userId={user.id} />;
+        return <SavingsAccount userId={user.id} onTabChange={setActiveTab} />;
       case 'loans':
-        return <LoanManagement userId={user.id} userProfile={userProfile} />;
+        return <LoanManagement userId={user.id} userProfile={userProfile} onTabChange={setActiveTab} />;
       case 'admin':
-        return isAdmin ? <AdminDashboard /> : <Dashboard userId={user.id} userProfile={userProfile} />;
+        return isAdmin ? <AdminDashboard onTabChange={setActiveTab} /> : <Dashboard userId={user.id} userProfile={userProfile} onTabChange={setActiveTab} />;
       default:
-        return <Dashboard userId={user.id} userProfile={userProfile} />;
+        return <Dashboard userId={user.id} userProfile={userProfile} onTabChange={setActiveTab} />;
     }
   };
 

@@ -7,12 +7,14 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Minus, TrendingUp } from 'lucide-react';
 import { useSavings } from '@/hooks/useSavings';
+import NavigationButtons from '@/components/NavigationButtons';
 
 interface SavingsAccountProps {
   userId: string;
+  onTabChange?: (tab: string) => void;
 }
 
-const SavingsAccount = ({ userId }: SavingsAccountProps) => {
+const SavingsAccount = ({ userId, onTabChange }: SavingsAccountProps) => {
   const { savingsAccount, transactions, loading, deposit, withdraw } = useSavings(userId);
   const [amount, setAmount] = useState('');
 
@@ -32,9 +34,21 @@ const SavingsAccount = ({ userId }: SavingsAccountProps) => {
     }
   };
 
+  const handleHome = () => {
+    if (onTabChange) onTabChange('dashboard');
+  };
+
+  const handleBack = () => {
+    if (onTabChange) onTabChange('dashboard');
+  };
+
   if (!savingsAccount) {
     return (
       <div className="space-y-6">
+        <NavigationButtons 
+          onHome={handleHome}
+          onBack={handleBack}
+        />
         <div className="text-center py-12">
           <h2 className="text-2xl font-bold text-gray-900">Setting up your savings account...</h2>
           <p className="text-gray-600 mt-2">Please wait while we initialize your account.</p>
@@ -45,6 +59,11 @@ const SavingsAccount = ({ userId }: SavingsAccountProps) => {
 
   return (
     <div className="space-y-6">
+      <NavigationButtons 
+        onHome={handleHome}
+        onBack={handleBack}
+      />
+      
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Savings Account</h1>
