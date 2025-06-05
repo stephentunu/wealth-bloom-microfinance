@@ -14,17 +14,17 @@ interface LoanWithUser {
   remaining_balance: number;
   next_payment_date: string;
   status: string;
-  approved_at: string;
-  approved_by?: string;
-  approval_date?: string;
-  rejection_reason?: string;
+  approved_at: string | null;
+  approved_by?: string | null;
+  approval_date?: string | null;
+  rejection_reason?: string | null;
   created_at: string;
-  updated_at?: string;
+  updated_at: string;
   user_profiles: {
     full_name: string;
     email: string;
     credit_score: number;
-  } | null;
+  };
 }
 
 export const useAdminLoans = () => {
@@ -60,13 +60,23 @@ export const useAdminLoans = () => {
         });
       } else if (data) {
         // Filter and type-check loans to ensure valid user profiles
-        const validLoans = data.filter((loan): loan is LoanWithUser => {
-          return loan.user_profiles !== null && 
-                 typeof loan.user_profiles === 'object' && 
-                 'full_name' in loan.user_profiles &&
-                 'email' in loan.user_profiles &&
-                 'credit_score' in loan.user_profiles;
-        });
+        const validLoans: LoanWithUser[] = data
+          .filter((loan: any) => {
+            return loan.user_profiles !== null && 
+                   typeof loan.user_profiles === 'object' && 
+                   'full_name' in loan.user_profiles &&
+                   'email' in loan.user_profiles &&
+                   'credit_score' in loan.user_profiles;
+          })
+          .map((loan: any) => ({
+            ...loan,
+            user_profiles: loan.user_profiles as {
+              full_name: string;
+              email: string;
+              credit_score: number;
+            }
+          }));
+        
         setLoans(validLoans);
       }
     } catch (error) {
