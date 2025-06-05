@@ -48,6 +48,7 @@ const SavingsAccount = ({ userId, onTabChange }: SavingsAccountProps) => {
         <NavigationButtons 
           onHome={handleHome}
           onBack={handleBack}
+          showBack={true}
         />
         <div className="text-center py-12">
           <h2 className="text-2xl font-bold text-gray-900">Setting up your savings account...</h2>
@@ -62,6 +63,7 @@ const SavingsAccount = ({ userId, onTabChange }: SavingsAccountProps) => {
       <NavigationButtons 
         onHome={handleHome}
         onBack={handleBack}
+        showBack={true}
       />
       
       <div className="flex items-center justify-between">
