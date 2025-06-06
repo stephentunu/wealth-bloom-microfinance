@@ -1,7 +1,7 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useFraudDetection } from '@/hooks/useFraudDetection';
 
 interface SavingsAccount {
   id: string;
@@ -28,6 +28,7 @@ export const useSavings = (userId: string | undefined) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const { analyzeTransaction, createFraudAlert } = useFraudDetection();
 
   useEffect(() => {
     if (userId) {
@@ -83,6 +84,27 @@ export const useSavings = (userId: string | undefined) => {
 
     setLoading(true);
     try {
+      // Fraud detection analysis
+      const fraudAnalysis = await analyzeTransaction(userId, 'deposit', amount, 'savings');
+      
+      if (fraudAnalysis.isFraudulent) {
+        const referenceNumber = `DEP${Date.now()}`;
+        await createFraudAlert(
+          userId,
+          referenceNumber,
+          'SUSPICIOUS_DEPOSIT',
+          fraudAnalysis.riskScore,
+          `Suspicious deposit flagged: ${fraudAnalysis.reasons.join(', ')}`
+        );
+        
+        toast({
+          title: "Transaction Flagged",
+          description: "This transaction has been flagged for review due to suspicious activity.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const newBalance = savingsAccount.balance + amount;
       const referenceNumber = `DEP${Date.now()}`;
 
@@ -148,6 +170,27 @@ export const useSavings = (userId: string | undefined) => {
 
     setLoading(true);
     try {
+      // Fraud detection analysis
+      const fraudAnalysis = await analyzeTransaction(userId, 'withdrawal', amount, 'savings');
+      
+      if (fraudAnalysis.isFraudulent) {
+        const referenceNumber = `WTH${Date.now()}`;
+        await createFraudAlert(
+          userId,
+          referenceNumber,
+          'SUSPICIOUS_WITHDRAWAL',
+          fraudAnalysis.riskScore,
+          `Suspicious withdrawal flagged: ${fraudAnalysis.reasons.join(', ')}`
+        );
+        
+        toast({
+          title: "Transaction Blocked",
+          description: "This withdrawal has been blocked due to suspicious activity. Please contact support.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const newBalance = savingsAccount.balance - amount;
       const referenceNumber = `WTH${Date.now()}`;
 
