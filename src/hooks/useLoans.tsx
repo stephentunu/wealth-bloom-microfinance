@@ -56,6 +56,25 @@ export const useLoans = (userId: string | undefined) => {
 
     setLoading(true);
     try {
+      // First, get the user's savings balance
+      const { data: savingsData, error: savingsError } = await supabase
+        .from('savings_accounts')
+        .select('balance')
+        .eq('user_id', userId)
+        .eq('is_active', true)
+        .single();
+
+      if (savingsError) {
+        console.error('Error fetching savings balance:', savingsError);
+        throw new Error('Unable to verify savings balance');
+      }
+
+      const savingsBalance = savingsData?.balance || 0;
+      
+      // Determine if loan should be auto-approved
+      const isAutoApproved = amount <= savingsBalance;
+      const loanStatus = isAutoApproved ? 'active' : 'pending';
+      
       const loanNumber = `LOAN${Date.now()}`;
       const termMonths = 12;
       const monthlyRate = interestRate / 100 / 12;
@@ -63,19 +82,25 @@ export const useLoans = (userId: string | undefined) => {
       const nextPaymentDate = new Date();
       nextPaymentDate.setMonth(nextPaymentDate.getMonth() + 1);
 
+      const loanData = {
+        user_id: userId,
+        loan_number: loanNumber,
+        principal_amount: amount,
+        interest_rate: interestRate / 100,
+        term_months: termMonths,
+        monthly_payment: monthlyPayment,
+        remaining_balance: amount,
+        next_payment_date: nextPaymentDate.toISOString().split('T')[0],
+        status: loanStatus,
+        ...(isAutoApproved ? {
+          approved_at: new Date().toISOString(),
+          approval_date: new Date().toISOString(),
+        } : {})
+      };
+
       const { error } = await supabase
         .from('loans')
-        .insert({
-          user_id: userId,
-          loan_number: loanNumber,
-          principal_amount: amount,
-          interest_rate: interestRate / 100,
-          term_months: termMonths,
-          monthly_payment: monthlyPayment,
-          remaining_balance: amount,
-          next_payment_date: nextPaymentDate.toISOString().split('T')[0],
-          status: 'pending', // Changed from 'active' to 'pending'
-        });
+        .insert(loanData);
 
       if (error) {
         throw error;
@@ -83,10 +108,17 @@ export const useLoans = (userId: string | undefined) => {
 
       await fetchLoans();
 
-      toast({
-        title: "Loan application submitted!",
-        description: `Your loan application for $${amount.toLocaleString()} is pending admin approval`,
-      });
+      if (isAutoApproved) {
+        toast({
+          title: "Loan approved automatically!",
+          description: `Your loan application for $${amount.toLocaleString()} has been approved and is now active`,
+        });
+      } else {
+        toast({
+          title: "Loan application submitted!",
+          description: `Your loan application for $${amount.toLocaleString()} exceeds your savings balance and requires admin approval`,
+        });
+      }
     } catch (error) {
       console.error('Loan application error:', error);
       toast({
