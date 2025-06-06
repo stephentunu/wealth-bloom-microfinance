@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -111,12 +112,12 @@ export const useLoans = (userId: string | undefined) => {
       if (isAutoApproved) {
         toast({
           title: "Loan approved automatically!",
-          description: `Your loan application for $${amount.toLocaleString()} has been approved and is now active`,
+          description: `Your loan application for KSh ${amount.toLocaleString()} has been approved and is now active`,
         });
       } else {
         toast({
           title: "Loan application submitted!",
-          description: `Your loan application for $${amount.toLocaleString()} exceeds your savings balance and requires admin approval`,
+          description: `Your loan application for KSh ${amount.toLocaleString()} exceeds your savings balance and requires admin approval`,
         });
       }
     } catch (error) {
@@ -177,7 +178,7 @@ export const useLoans = (userId: string | undefined) => {
 
       toast({
         title: "Payment successful!",
-        description: `Payment of $${paymentAmount.toLocaleString()} has been processed`,
+        description: `Payment of KSh ${paymentAmount.toLocaleString()} has been processed`,
       });
     } catch (error) {
       console.error('Payment error:', error);

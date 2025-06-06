@@ -58,10 +58,10 @@ const Dashboard = ({ userId, userProfile, onTabChange }: DashboardProps) => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
-              ${savingsAccount?.balance?.toLocaleString() || '0'}
+              KSh {savingsAccount?.balance?.toLocaleString() || '0'}
             </div>
             <p className="text-xs text-muted-foreground">
-              +${savingsAccount?.interest_earned?.toFixed(2) || '0.00'} interest earned
+              +KSh {savingsAccount?.interest_earned?.toFixed(2) || '0.00'} interest earned
             </p>
           </CardContent>
         </Card>
@@ -87,7 +87,7 @@ const Dashboard = ({ userId, userProfile, onTabChange }: DashboardProps) => {
           <CardContent>
             <div className="text-2xl font-bold text-orange-600">{loans.filter(l => l.status === 'active').length}</div>
             <p className="text-xs text-muted-foreground">
-              ${totalOwed.toLocaleString()} remaining
+              KSh {totalOwed.toLocaleString()} remaining
             </p>
           </CardContent>
         </Card>
@@ -99,7 +99,7 @@ const Dashboard = ({ userId, userProfile, onTabChange }: DashboardProps) => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-purple-600">
-              ${loanCapacity.toLocaleString()}
+              KSh {loanCapacity.toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground">Available to borrow</p>
           </CardContent>
@@ -146,7 +146,7 @@ const Dashboard = ({ userId, userProfile, onTabChange }: DashboardProps) => {
                   <span className={`text-sm font-medium ${
                     transaction.transaction_type === 'deposit' ? 'text-green-600' : 'text-red-600'
                   }`}>
-                    {transaction.transaction_type === 'deposit' ? '+' : '-'}${transaction.amount.toLocaleString()}
+                    {transaction.transaction_type === 'deposit' ? '+' : '-'}KSh {transaction.amount.toLocaleString()}
                   </span>
                 </div>
               ))}

@@ -90,10 +90,10 @@ const SavingsAccount = ({ userId, onTabChange }: SavingsAccountProps) => {
             </CardHeader>
             <CardContent>
               <div className="text-4xl font-bold text-green-600 mb-2">
-                ${savingsAccount.balance.toLocaleString()}
+                KSh {savingsAccount.balance.toLocaleString()}
               </div>
               <p className="text-sm text-muted-foreground">
-                Interest earned: ${savingsAccount.interest_earned.toFixed(2)}
+                Interest earned: KSh {savingsAccount.interest_earned.toFixed(2)}
               </p>
             </CardContent>
           </Card>
@@ -117,10 +117,10 @@ const SavingsAccount = ({ userId, onTabChange }: SavingsAccountProps) => {
                       <span className={`text-sm font-medium ${
                         transaction.transaction_type === 'deposit' ? 'text-green-600' : 'text-red-600'
                       }`}>
-                        {transaction.transaction_type === 'deposit' ? '+' : '-'}${transaction.amount.toLocaleString()}
+                        {transaction.transaction_type === 'deposit' ? '+' : '-'}KSh {transaction.amount.toLocaleString()}
                       </span>
                       <p className="text-xs text-muted-foreground">
-                        Balance: ${transaction.balance_after?.toLocaleString() || '0'}
+                        Balance: KSh {transaction.balance_after?.toLocaleString() || '0'}
                       </p>
                     </div>
                   </div>
@@ -143,7 +143,7 @@ const SavingsAccount = ({ userId, onTabChange }: SavingsAccountProps) => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="amount">Amount ($)</Label>
+                <Label htmlFor="amount">Amount (KSh)</Label>
                 <Input
                   id="amount"
                   type="number"
@@ -175,7 +175,7 @@ const SavingsAccount = ({ userId, onTabChange }: SavingsAccountProps) => {
               </div>
               
               <div className="text-xs text-muted-foreground mt-4">
-                <p>• Minimum deposit: $10</p>
+                <p>• Minimum deposit: KSh 10</p>
                 <p>• Interest calculated daily</p>
                 <p>• No fees for deposits</p>
                 <p>• Withdrawals processed instantly</p>

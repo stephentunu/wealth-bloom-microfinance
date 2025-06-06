@@ -122,7 +122,7 @@ const AdminDashboard = ({ onTabChange }: AdminDashboardProps) => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              ${approvedLoans.reduce((sum, loan) => sum + loan.principal_amount, 0).toLocaleString()}
+              KSh {approvedLoans.reduce((sum, loan) => sum + loan.principal_amount, 0).toLocaleString()}
             </div>
           </CardContent>
         </Card>
@@ -153,11 +153,11 @@ const AdminDashboard = ({ onTabChange }: AdminDashboardProps) => {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                     <div>
                       <p className="text-muted-foreground">Loan Amount</p>
-                      <p className="font-medium">${loan.principal_amount.toLocaleString()}</p>
+                      <p className="font-medium">KSh {loan.principal_amount.toLocaleString()}</p>
                     </div>
                     <div>
                       <p className="text-muted-foreground">Monthly Payment</p>
-                      <p className="font-medium">${loan.monthly_payment.toLocaleString()}</p>
+                      <p className="font-medium">KSh {loan.monthly_payment.toLocaleString()}</p>
                     </div>
                     <div>
                       <p className="text-muted-foreground">Credit Score</p>
@@ -251,7 +251,7 @@ const AdminDashboard = ({ onTabChange }: AdminDashboardProps) => {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                   <div>
                     <p className="text-muted-foreground">Principal Amount</p>
-                    <p className="font-medium">${loan.principal_amount.toLocaleString()}</p>
+                    <p className="font-medium">KSh {loan.principal_amount.toLocaleString()}</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground">Credit Score</p>
@@ -263,7 +263,7 @@ const AdminDashboard = ({ onTabChange }: AdminDashboardProps) => {
                   </div>
                   <div>
                     <p className="text-muted-foreground">Remaining Balance</p>
-                    <p className="font-medium">${loan.remaining_balance.toLocaleString()}</p>
+                    <p className="font-medium">KSh {loan.remaining_balance.toLocaleString()}</p>
                   </div>
                 </div>
 

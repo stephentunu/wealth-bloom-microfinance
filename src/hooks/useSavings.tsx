@@ -120,7 +120,7 @@ export const useSavings = (userId: string | undefined) => {
 
       toast({
         title: "Deposit successful!",
-        description: `$${amount.toLocaleString()} has been added to your savings`,
+        description: `KSh ${amount.toLocaleString()} has been added to your savings`,
       });
     } catch (error) {
       console.error('Deposit error:', error);
@@ -185,7 +185,7 @@ export const useSavings = (userId: string | undefined) => {
 
       toast({
         title: "Withdrawal successful!",
-        description: `$${amount.toLocaleString()} has been withdrawn from your savings`,
+        description: `KSh ${amount.toLocaleString()} has been withdrawn from your savings`,
       });
     } catch (error) {
       console.error('Withdrawal error:', error);

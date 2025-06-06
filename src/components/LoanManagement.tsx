@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -172,15 +173,15 @@ const LoanManagement = ({ userId, userProfile, onTabChange }: LoanManagementProp
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div>
                           <p className="text-muted-foreground">Principal Amount</p>
-                          <p className="font-medium">${loan.principal_amount.toLocaleString()}</p>
+                          <p className="font-medium">KSh {loan.principal_amount.toLocaleString()}</p>
                         </div>
                         <div>
                           <p className="text-muted-foreground">Remaining</p>
-                          <p className="font-medium text-orange-600">${loan.remaining_balance.toLocaleString()}</p>
+                          <p className="font-medium text-orange-600">KSh {loan.remaining_balance.toLocaleString()}</p>
                         </div>
                         <div>
                           <p className="text-muted-foreground">Monthly Payment</p>
-                          <p className="font-medium">${loan.monthly_payment.toLocaleString()}</p>
+                          <p className="font-medium">KSh {loan.monthly_payment.toLocaleString()}</p>
                         </div>
                         <div>
                           <p className="text-muted-foreground">Interest Rate</p>
@@ -204,7 +205,7 @@ const LoanManagement = ({ userId, userProfile, onTabChange }: LoanManagementProp
                             className="w-full"
                             disabled={loading}
                           >
-                            Make Payment (${loan.monthly_payment.toLocaleString()})
+                            Make Payment (KSh {loan.monthly_payment.toLocaleString()})
                           </Button>
                         </>
                       )}
@@ -240,7 +241,7 @@ const LoanManagement = ({ userId, userProfile, onTabChange }: LoanManagementProp
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div className="text-center p-4 bg-green-50 rounded-lg">
                   <div className="text-2xl font-bold text-green-600">
-                    ${eligibility.max_loan_amount?.toLocaleString() || '0'}
+                    KSh {eligibility.max_loan_amount?.toLocaleString() || '0'}
                   </div>
                   <p className="text-sm text-muted-foreground">Maximum Loan Amount</p>
                 </div>
@@ -266,7 +267,7 @@ const LoanManagement = ({ userId, userProfile, onTabChange }: LoanManagementProp
                     <AlertCircle className="w-4 h-4 text-red-600" />
                   )}
                   <span className="text-sm">
-                    Savings Balance: ${savingsAccount?.balance?.toLocaleString() || '0'}
+                    Savings Balance: KSh {savingsAccount?.balance?.toLocaleString() || '0'}
                   </span>
                 </div>
               </div>
@@ -285,7 +286,7 @@ const LoanManagement = ({ userId, userProfile, onTabChange }: LoanManagementProp
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="loan-amount">Loan Amount ($)</Label>
+                <Label htmlFor="loan-amount">Loan Amount (KSh)</Label>
                 <Input
                   id="loan-amount"
                   type="number"
@@ -295,7 +296,7 @@ const LoanManagement = ({ userId, userProfile, onTabChange }: LoanManagementProp
                   max={eligibility.max_loan_amount}
                 />
                 <p className="text-xs text-muted-foreground mt-1">
-                  Maximum: ${eligibility.max_loan_amount?.toLocaleString() || '0'}
+                  Maximum: KSh {eligibility.max_loan_amount?.toLocaleString() || '0'}
                 </p>
               </div>
 
@@ -319,15 +320,15 @@ const LoanManagement = ({ userId, userProfile, onTabChange }: LoanManagementProp
                       <div className="text-xs space-y-1">
                         <div className="flex justify-between">
                           <span>Monthly Payment:</span>
-                          <span className="font-medium">${details.monthlyPayment}</span>
+                          <span className="font-medium">KSh {details.monthlyPayment}</span>
                         </div>
                         <div className="flex justify-between">
                           <span>Total Amount:</span>
-                          <span className="font-medium">${details.totalAmount}</span>
+                          <span className="font-medium">KSh {details.totalAmount}</span>
                         </div>
                         <div className="flex justify-between">
                           <span>Total Interest:</span>
-                          <span className="font-medium">${details.totalInterest}</span>
+                          <span className="font-medium">KSh {details.totalInterest}</span>
                         </div>
                         <div className="flex justify-between">
                           <span>Term:</span>
